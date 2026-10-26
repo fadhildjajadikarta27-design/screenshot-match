@@ -1,3 +1,4 @@
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -76,7 +77,7 @@ function GuestPage() {
       {ev.coverUrl && (
         <img src={ev.coverUrl} alt="" className="mb-6 aspect-[16/10] w-full rounded-2xl object-cover shadow-soft" />
       )}
-      <p className="eyebrow">{ev.eventType ?? tr("Event")}</p>
+      <p className="eyebrow">{tr(ev.eventType ?? "Event")}</p>
       <h1 className="mt-2 font-display text-4xl leading-tight sm:text-5xl">{ev.title}</h1>
       {ev.eventDate && (
         <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -122,6 +123,7 @@ function Shell({ children, hideBranding = false }: { children: React.ReactNode; 
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-6">
+        <div className="mb-4 flex justify-end"><LanguageSelector /></div>
         {!hideBranding && <div className="mb-8 flex justify-center"><Wordmark /></div>}
         {children}
         <p className="mt-16 text-center text-xs text-muted-foreground">
@@ -210,7 +212,7 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
         } catch {
           prepared = { file: item.file, thumb: null, width: 0, height: 0, name: item.file.name };
         }
-        if (prepared.file.size > maxMb * 1024 * 1024) throw Object.assign(new Error(`Photos must be under ${maxMb} MB.`), { retry: false });
+        if (prepared.file.size > maxMb * 1024 * 1024) throw Object.assign(new Error(language === "en" ? `Photos must be under ${maxMb} MB.` : `Ukuran foto harus di bawah ${maxMb} MB.`), { retry: false });
         const fd = new FormData();
         fd.append("slug", slug);
         if (token) fd.append("token", token);
@@ -277,7 +279,7 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
       seen.current.add(sig);
       added.push({ key: crypto.randomUUID(), file: f, preview: URL.createObjectURL(f), status: "queued", progress: 0 });
     }
-    if (rejected) toast.error(`${rejected} file(s) skipped — only JPEG, PNG and WebP are supported.`);
+    if (rejected) toast.error(language === "en" ? `${rejected} file(s) skipped — only JPEG, PNG and WebP are supported.` : `${rejected} file dilewati — hanya JPEG, PNG, dan WebP yang didukung.`);
     if (added.length) setItems((l) => [...added, ...l]);
     if (inputRef.current) inputRef.current.value = "";
   }
@@ -300,12 +302,12 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
       <Button size="lg" className="h-14 w-full text-base" onClick={() => inputRef.current?.click()}>
         <Camera className="!size-5" /> {tr("Upload Photos")}
       </Button>
-      <p className="mt-2 text-center text-xs text-muted-foreground">JPEG, PNG or WebP · up to {maxMb} MB each</p>
+      <p className="mt-2 text-center text-xs text-muted-foreground">{language === "en" ? `JPEG, PNG or WebP · up to ${maxMb} MB each` : `JPEG, PNG, atau WebP · hingga ${maxMb} MB per foto`}</p>
 
       {items.length > 0 && (
         <div className="mt-6 rounded-2xl border border-border bg-card p-4">
           <p className="text-sm">
-            {active > 0 ? `Uploading… ${done} of ${items.length} done` : `${done} of ${items.length} uploaded`}
+            {active > 0 ? language === "en" ? `Uploading… ${done} of ${items.length} done` : `Mengunggah… ${done} dari ${items.length} selesai` : language === "en" ? `${done} of ${items.length} uploaded` : `${done} dari ${items.length} diunggah`}
           </p>
           <ul className="mt-3 space-y-2">
             {items.map((i) => (
@@ -432,7 +434,7 @@ function Gallery({ slug, token, downloads, initialCount }: { slug: string; token
           onClose={() => setOpen(null)}
           resolveUrl={resolve}
           onDownload={downloads ? download : undefined}
-          caption={(i) => (photos[i]?.uploadedAt ? new Date(photos[i]!.uploadedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "")}
+          caption={(i) => (photos[i]?.uploadedAt ? new Date(photos[i]?.uploadedAt ?? "").toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" }) : "")}
         />
       )}
     </section>
@@ -443,7 +445,7 @@ const Tile = memo(function Tile({ photo, index, onOpen }: { photo: PublicPhoto; 
   const { t: tr, locale, language } = useLanguage();
   const [failed, setFailed] = useState(false);
   return (
-    <button onClick={() => onOpen(index)} className="block overflow-hidden rounded-md bg-muted focus-visible:outline-2 focus-visible:outline-ring" aria-label={`Open photo ${index + 1}`}>
+    <button onClick={() => onOpen(index)} className="block overflow-hidden rounded-md bg-muted focus-visible:outline-2 focus-visible:outline-ring" aria-label={`${language === "en" ? "Open photo" : "Buka foto"} ${index + 1}`}>
       {photo.thumbUrl && !failed ? (
         <img src={photo.thumbUrl} alt="" loading="lazy" decoding="async" width={240} height={240} onError={() => setFailed(true)} className="aspect-square w-full object-cover" />
       ) : (

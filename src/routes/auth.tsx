@@ -1,3 +1,4 @@
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
@@ -92,6 +93,7 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-5 py-10">
+      <div className="mb-5"><LanguageSelector /></div>
       <Wordmark />
       <div className="mt-8 w-full max-w-sm rounded-2xl border border-border bg-card p-7 shadow-soft">
         <h1 className="font-display text-3xl">{tr(title)}</h1>

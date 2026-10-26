@@ -80,7 +80,7 @@ export function Lightbox({ count, index, onIndex, onClose, resolveUrl, onDownloa
           <img
             key={url}
             src={url}
-            alt={`Photo ${index + 1}`}
+            alt={`${language === "en" ? "Photo" : "Foto"} ${index + 1}`}
             onLoad={() => setState("ok")}
             onError={() => setState("error")}
             className={`max-h-full max-w-full object-contain transition-opacity ${state === "ok" ? "opacity-100" : "opacity-0"}`}

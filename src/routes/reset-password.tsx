@@ -1,3 +1,4 @@
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
@@ -39,6 +40,7 @@ function Reset() {
   }
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-5">
+      <div className="mb-5"><LanguageSelector /></div>
       <Wordmark />
       <form onSubmit={submit} className="mt-8 w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-7 shadow-soft">
         <h1 className="font-display text-3xl">{tr("Set a new password")}</h1>

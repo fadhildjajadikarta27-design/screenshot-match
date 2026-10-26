@@ -46,7 +46,7 @@ function ManageEvent() {
   const { data: ev, isLoading, refetch } = useQuery({
     queryKey: ["event", id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("events").select(EVENT_COLUMNS).eq(tr("id"), id).maybeSingle();
+      const { data, error } = await supabase.from("events").select(EVENT_COLUMNS).eq("id", id).maybeSingle();
       if (error) throw error;
       return data as EventRecord | null;
     },
@@ -66,7 +66,7 @@ function ManageEvent() {
       <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">{tr("← Events")}</Link>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">{ev.event_type ?? tr("Event")}</p>
+          <p className="eyebrow">{tr(ev.event_type ?? "Event")}</p>
           <h1 className="mt-1 font-display text-4xl">{ev.title}</h1>
         </div>
         <Button asChild variant="outline"><a href={`/e/${ev.slug}`} target="_blank" rel="noreferrer"><ExternalLink /> {tr("Open guest page")}</a></Button>
@@ -99,7 +99,7 @@ function ManageEvent() {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete “{ev.title}”?</AlertDialogTitle>
+                  <AlertDialogTitle>{tr("Delete")} “{ev.title}”?</AlertDialogTitle>
                   <AlertDialogDescription>{tr("All photos will be permanently deleted. This can't be undone.")}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -145,7 +145,7 @@ function SharePanel({ ev }: { ev: EventRecord }) {
         <div className="flex flex-wrap gap-2">
           <Button onClick={() => navigator.clipboard.writeText(url).then(() => toast.success(tr("Link copied")), () => toast.error(tr("Couldn't copy")))}><Copy /> {tr("Copy link")}</Button>
           {canShare && (
-            <Button variant="outline" onClick={() => navigator.share({ title: ev.title, text: `Share your photos from ${ev.title}`, url }).catch(() => {})}><Share2 /> {tr("Share")}</Button>
+            <Button variant="outline" onClick={() => navigator.share({ title: ev.title, text: `${tr("Share your photos")} · ${ev.title}`, url }).catch(() => {})}><Share2 /> {tr("Share")}</Button>
           )}
           <Button variant="outline" asChild disabled={!qr}>
             <a href={qr ?? "#"} download={`velora-${ev.slug}-qr.png`}><Download /> {tr("Download QR (PNG)")}</a>
@@ -155,10 +155,10 @@ function SharePanel({ ev }: { ev: EventRecord }) {
           </Button>
         </div>
         <ul className="space-y-1 text-sm text-muted-foreground">
-          <li>{tr("Paket:")} {planOf(ev.plan).name} · Maks {planOf(ev.plan).maxPhotos.toLocaleString(locale)} {tr("foto")}</li>
+          <li>{tr("Paket:")} {tr(planOf(ev.plan).name)} · {tr("Max")} {planOf(ev.plan).maxPhotos.toLocaleString(locale)} {tr("foto")}</li>
           <li>{ev.expires_at ? `${isExpired(ev.expires_at) ? tr("Album berakhir") : tr("Album aktif sampai")} ${new Date(ev.expires_at).toLocaleDateString(locale, { dateStyle: "long" })}` : tr("Tanpa tanggal berakhir")}</li>
-          <li>Access: {ev.privacy === "pin" ? tr("PIN protected") : tr("Anyone with the link")}</li>
-          <li>Uploads: {ev.uploads_enabled ? tr("Open") : tr("Closed")} · Gallery: {ev.gallery_visible ? tr("Visible") : tr("Hidden")} · Downloads: {ev.downloads_enabled ? tr("Allowed") : tr("Off")}</li>
+          <li>{tr("Access")}: {ev.privacy === "pin" ? tr("PIN protected") : tr("Anyone with the link")}</li>
+          <li>{tr("Uploads")}: {ev.uploads_enabled ? tr("Open") : tr("Closed")} · {tr("Gallery")}: {ev.gallery_visible ? tr("Visible") : tr("Hidden")} · {tr("Downloads")}: {ev.downloads_enabled ? tr("Allowed") : tr("Off")}</li>
         </ul>
       </div>
     </div>
@@ -178,11 +178,11 @@ function PhotosPanel({ ev }: { ev: EventRecord }) {
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const { data, error } = await supabase
-        .from(tr("photos"))
+        .from("photos")
         .select("id,storage_path,thumbnail_path,file_size,uploaded_at")
         .eq("event_id", ev.id)
         .order("uploaded_at", { ascending: false })
-        .order(tr("id"), { ascending: false })
+        .order("id", { ascending: false })
         .range(pageParam, pageParam + PAGE - 1);
       if (error) throw error;
       const rows = data ?? [];
@@ -211,7 +211,7 @@ function PhotosPanel({ ev }: { ev: EventRecord }) {
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">{tr("Paket")} {planOf(ev.plan).name}</p>
+        <p className="text-sm text-muted-foreground">{tr("Paket")} {tr(planOf(ev.plan).name)}</p>
         {planOf(ev.plan).zipDownload ? <ZipButton eventId={ev.id} slug={ev.slug} /> : <p className="text-xs text-muted-foreground">{tr("Unduh semua (ZIP) tersedia di paket Premium & Exclusive")}</p>}
       </div>
       <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
@@ -254,7 +254,7 @@ function PhotosPanel({ ev }: { ev: EventRecord }) {
             const u = await original(i, true);
             if (u) window.location.href = u;
           }}
-          caption={(i) => `${formatBytes(photos[i]?.file_size ?? 0)} · ${photos[i]?.uploaded_at ? new Date(photos[i]!.uploaded_at!).toLocaleString() : ""}`}
+          caption={(i) => `${formatBytes(photos[i]?.file_size ?? 0)} · ${photos[i]?.uploaded_at ? new Date(photos[i]?.uploaded_at ?? "").toLocaleString() : ""}`}
         />
       )}
     </div>
@@ -269,7 +269,7 @@ function ZipButton({ eventId, slug }: { eventId: string; slug: string }) {
     try {
       const rows: { storage_path: string; original_filename: string | null }[] = [];
       for (let from = 0; ; from += 1000) {
-        const { data, error } = await supabase.from(tr("photos")).select("storage_path,original_filename").eq("event_id", eventId).range(from, from + 999);
+        const { data, error } = await supabase.from("photos").select("storage_path,original_filename").eq("event_id", eventId).range(from, from + 999);
         if (error) throw error;
         rows.push(...(data ?? []));
         if (!data || data.length < 1000) break;

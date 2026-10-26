@@ -52,7 +52,7 @@ export function PackageAdvisor({ eventType, audience, onApply }: Props) {
         <div className="space-y-2 rounded-lg border border-border bg-card p-4">
           <p className="font-display text-xl">{tr("Paket")} {PLAN_TIERS[rec.plan].name}</p>
           {rec.addons.length > 0 && (
-            <p className="text-sm">Add-on: {rec.addons.map((id) => ADDONS.find((a) => a.id === id)?.name).join(", ")}</p>
+            <p className="text-sm">{tr("Add-on")}: {rec.addons.map((id) => tr(ADDONS.find((a) => a.id === id)?.name ?? "")).join(", ")}</p>
           )}
           <p className="text-sm text-muted-foreground">{rec.reason}</p>
           <p className="text-sm">{tr("Perkiraan total:")} <span className="font-medium">{formatPrice(total, language)}</span></p>

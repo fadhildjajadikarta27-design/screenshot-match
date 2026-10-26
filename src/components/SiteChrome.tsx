@@ -1,3 +1,4 @@
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/components/LanguageProvider";
 import { Link } from "@tanstack/react-router";
 import { Wordmark } from "./Logo";
@@ -11,7 +12,8 @@ export function SiteHeader() {
     <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <Wordmark />
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1 sm:gap-2">
+          <LanguageSelector />
           <Link to="/demo" className="hidden px-3 text-sm text-muted-foreground hover:text-foreground sm:inline">
             Demo
           </Link>
@@ -24,7 +26,7 @@ export function SiteHeader() {
             </Button>
           ) : (
             <>
-              <Link to="/auth" className="px-3 text-sm text-muted-foreground hover:text-foreground">
+              <Link to="/auth" className="hidden px-3 text-sm text-muted-foreground hover:text-foreground sm:inline">
                 {tr("Sign in")}
               </Link>
               <Button asChild size="sm">

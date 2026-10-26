@@ -1,4 +1,4 @@
-import { formatPrice } from "@/lib/locale-format";
+import { formatDuration, formatPrice } from "@/lib/locale-format";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -28,7 +28,7 @@ export function EventForm({ initial, onSaved }: Props) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(!!initial);
-  const [eventType, setEventType] = useState(initial?.event_type ?? tr("Wedding"));
+  const [eventType, setEventType] = useState(initial?.event_type ?? "Wedding");
   const [eventDate, setEventDate] = useState(toLocalDate(initial?.event_date));
   const [description, setDescription] = useState(initial?.description ?? "");
   const [privacy, setPrivacy] = useState<"public" | "pin">((initial?.privacy as "public" | "pin") ?? "public");
@@ -111,7 +111,7 @@ export function EventForm({ initial, onSaved }: Props) {
         <h2 className="font-display text-2xl">{tr("Details")}</h2>
         <div className="space-y-1.5">
           <Label htmlFor="title">{tr("Event title")}</Label>
-          <Input id="title" required maxLength={120} value={tr(title)} onChange={(e) => { setTitle(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }} placeholder="Ayu & Bima" />
+          <Input id="title" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }} placeholder="Ayu & Bima" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="slug">{tr("Event link")}</Label>
@@ -145,7 +145,7 @@ export function EventForm({ initial, onSaved }: Props) {
       <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
         <div>
           <h2 className="font-display text-2xl">{tr("Paket")}</h2>
-          <p className="text-sm text-muted-foreground">Harga untuk {EVENT_TYPE_LABELS[eventType ?? tr("Other")] ?? tr("acara ini")}, menyesuaikan jumlah tamu. Pembayaran segera hadir.</p>
+          <p className="text-sm text-muted-foreground">{language === "en" ? "Pricing for" : "Harga untuk"} {tr(EVENT_TYPE_LABELS[eventType ?? "Other"] ?? "acara ini")}{language === "en" ? " varies by guest count. Payments are coming soon." : ", menyesuaikan jumlah tamu. Pembayaran segera hadir."}</p>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="aud">{tr("Perkiraan jumlah tamu")}</Label>
@@ -153,7 +153,7 @@ export function EventForm({ initial, onSaved }: Props) {
             {AUDIENCE_IDS.map((a) => <option key={a} value={a}>{tr(AUDIENCE[a].label)}</option>)}
           </select>
         </div>
-        <PackageAdvisor eventType={eventType ?? tr("Other")} audience={audience} onApply={(p, a) => { setPlan(p); setAddons(a); toast.success(tr("Rekomendasi diterapkan")); }} />
+        <PackageAdvisor eventType={eventType ?? "Other"} audience={audience} onApply={(p, a) => { setPlan(p); setAddons(a); toast.success(tr("Rekomendasi diterapkan")); }} />
         <div className="grid gap-3 sm:grid-cols-2">
           {PLAN_IDS.map((id) => {
             const t = PLAN_TIERS[id];
@@ -166,7 +166,7 @@ export function EventForm({ initial, onSaved }: Props) {
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{tr(blurbFor(eventType, id))}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {`${t.maxPhotos.toLocaleString(locale)} foto`} · aktif {t.activeDays >= 365 ? tr("1 tahun") : t.activeDays >= 180 ? tr("6 bulan") : `${t.activeDays} hari`}
+                  {t.maxPhotos.toLocaleString(locale)} {tr("photos")} · {tr("active for")} {formatDuration(t.activeDays, language)}
                   {t.zipDownload ? tr(" · unduh ZIP") : ""}{t.hideBranding ? tr(" · tanpa logo") : ""}
                 </p>
               </label>

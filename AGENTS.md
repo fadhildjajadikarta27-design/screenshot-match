@@ -15,3 +15,5 @@
 - Server-only helpers (`*.server.ts`) are dynamically imported inside handlers so they never enter the client bundle.
 - Android is a Capacitor shell loading the hosted URL because the app is server-rendered.
 - Plan tiers and per-event-type prices live only in `src/lib/plans.ts`; server (saveEvent, uploads) derives photo limits and expiry from it so the UI and enforcement never drift.
+
+- App UI translations use LanguageProvider and the shared translations dictionary; persist the selected locale after hydration, and translate display labels only, never stored identifiers or user content.

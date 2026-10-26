@@ -1,4 +1,4 @@
-import { formatPrice } from "@/lib/locale-format";
+import { formatDuration, formatPrice } from "@/lib/locale-format";
 import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -12,41 +12,37 @@ export const Route = createFileRoute("/pricing")({
   component: Pricing,
 });
 
-function duration(days: number) {
-  return days >= 365 ? "1 tahun" : days >= 180 ? "6 bulan" : `${days} hari`;
-}
-
 function Pricing() {
   const { t: tr, locale, language } = useLanguage();
-  const [type, setType] = useState<string>(tr("Wedding"));
+  const [type, setType] = useState<string>("Wedding");
   const [aud, setAud] = useState<AudienceId>("s");
   return (
     <InfoPage eyebrow={tr("Harga")} title={tr("Paket per acara")}>
       <p>{tr("Bayar sekali untuk tiap acara. Harga menyesuaikan jenis acara dan perkiraan jumlah tamu. Tidak ada paket gratis — tapi kamu bisa mencoba paket Exclusive dengan 20 foto gratis. Pembayaran online segera hadir.")}</p>
       <div className="not-prose mt-6 flex flex-wrap gap-2">
         {EVENT_TYPES.map((t) => (
-          <button
+          <Button variant="outline"
             key={t}
             onClick={() => setType(t)}
             className={`rounded-full border px-4 py-1.5 text-sm ${type === t ? "border-gold bg-accent text-foreground" : "border-border text-muted-foreground hover:text-foreground"}`}
           >
             {tr(EVENT_TYPE_LABELS[t])}
-          </button>
+          </Button>
         ))}
       </div>
       <div className="not-prose mt-4 flex flex-wrap gap-2">
         {AUDIENCE_IDS.map((a) => (
-          <button key={a} onClick={() => setAud(a)} className={`rounded-full border px-3 py-1 text-xs ${aud === a ? "border-gold bg-accent text-foreground" : "border-border text-muted-foreground hover:text-foreground"}`}>
+          <Button variant="outline" key={a} onClick={() => setAud(a)} className={`rounded-full border px-3 py-1 text-xs ${aud === a ? "border-gold bg-accent text-foreground" : "border-border text-muted-foreground hover:text-foreground"}`}>
             {tr(AUDIENCE[a].label)}
-          </button>
+          </Button>
         ))}
       </div>
       <div className="not-prose mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {PLAN_IDS.map((id) => {
           const t = PLAN_TIERS[id];
           const feats: [string, boolean][] = [
-            [`${t.maxPhotos.toLocaleString(locale)} foto`, true],
-            [`Album aktif ${duration(t.activeDays)}`, true],
+            [`${t.maxPhotos.toLocaleString(locale)} ${tr("photos")}`, true],
+            [`${language === "en" ? "Album active for" : "Album aktif"} ${formatDuration(t.activeDays, language)}`, true],
             [tr("Kode QR & kartu cetak"), true],
             [tr("Unduh semua (ZIP)"), t.zipDownload],
             [tr("Tanpa logo VELORA"), t.hideBranding],

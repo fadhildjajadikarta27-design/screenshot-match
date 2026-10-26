@@ -1,3 +1,4 @@
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -27,13 +28,14 @@ function PrintCard() {
   const { id } = Route.useParams();
   const { data: ev } = useQuery({
     queryKey: ["event-print", id],
-    queryFn: async () => (await supabase.from("events").select("title,slug,event_date").eq(tr("id"), id).maybeSingle()).data,
+    queryFn: async () => (await supabase.from("events").select("title,slug,event_date").eq("id", id).maybeSingle()).data,
   });
   const qr = useQrDataUrl(ev ? eventUrl(ev.slug) : "", 900);
   if (!ev) return <div className="p-10">{tr("Loading…")}</div>;
   return (
     <div className="flex min-h-screen flex-col items-center bg-background px-5 py-8">
-      <div className="no-print mb-6 flex gap-2">
+      <div className="no-print mb-6 flex flex-wrap gap-2">
+        <LanguageSelector />
         <Button variant="outline" asChild><Link to="/events/$id" params={{ id }}>{tr("← Back")}</Link></Button>
         <Button onClick={() => window.print()}><Printer /> {tr("Print")}</Button>
       </div>

@@ -62,7 +62,7 @@ function Dashboard() {
           <p className="eyebrow">{tr("Dashboard")}</p>
           <h1 className="mt-2 font-display text-4xl">{tr("Your events")}</h1>
           {data && data.length > 0 && (
-            <p className="mt-1 text-sm text-muted-foreground">{data.length} events · {formatBytes(totalBytes)} stored</p>
+            <p className="mt-1 text-sm text-muted-foreground">{data.length} {language === "en" ? "events" : "acara"} · {formatBytes(totalBytes)} {language === "en" ? "stored" : "tersimpan"}</p>
           )}
         </div>
         <Button asChild><Link to="/events/new"><Plus /> {tr("New event")}</Link></Button>
@@ -107,10 +107,10 @@ function Dashboard() {
                   <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <CalendarDays className="h-3.5 w-3.5" />
                     {e.event_date ? new Date(e.event_date).toLocaleDateString(locale, { dateStyle: "medium" }) : tr("No date")}
-                    {e.event_type ? ` · ${e.event_type}` : ""}
+                    {e.event_type ? ` · ${tr(e.event_type)}` : ""}
                   </p>
                   <div className="mt-4 flex items-center justify-between text-sm">
-                    <span>{e.photoCount} photos · {formatBytes(e.bytes)}</span>
+                    <span>{e.photoCount} {tr("photos")} · {formatBytes(e.bytes)}</span>
                     <span className={`rounded-full px-2.5 py-0.5 text-xs ${e.uploads_enabled ? "bg-accent text-foreground" : "bg-muted text-muted-foreground"}`}>
                       {e.uploads_enabled ? tr("Uploads open") : tr("Uploads closed")}
                     </span>
