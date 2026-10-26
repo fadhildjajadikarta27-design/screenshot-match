@@ -86,21 +86,17 @@ export function isAudienceId(v: unknown): v is AudienceId {
   return typeof v === "string" && (AUDIENCE_IDS as string[]).includes(v);
 }
 
-/** Price = base per event type × audience-size multiplier, rounded to Rp 1.000. Trial is always free. */
+/** Price = base per event type × audience-size multiplier, rounded UP so the price always ends in 9 (e.g. 529.000). Trial is always free. */
 export function priceFor(eventType: string | null | undefined, plan: PlanId, audience: AudienceId = "s"): number {
   if (plan === "trial") return 0;
   const base = (PRICES[eventType ?? "Other"] ?? FAMILY)[plan];
-  return Math.round((base * AUDIENCE[audience].multiplier) / 1000) * 1000;
+  return Math.ceil((base * AUDIENCE[audience].multiplier) / 10000) * 10000 - 1000;
 }
 
-export type AddonId = "slideshow" | "extra_photos" | "extend_6m" | "table_cards" | "moderation" | "custom_link";
+export type AddonId = "slideshow" | "extra_photos";
 export const ADDONS: { id: AddonId; name: string; price: number; desc: string }[] = [
-  { id: "slideshow", name: "Live slideshow", price: 99000, desc: "Tampilkan foto tamu langsung di layar acara." },
-  { id: "extra_photos", name: "+1.000 foto", price: 79000, desc: "Tambahan kuota foto untuk album." },
-  { id: "extend_6m", name: "Perpanjang 6 bulan", price: 69000, desc: "Album tetap aktif 6 bulan lebih lama." },
-  { id: "table_cards", name: "Kartu QR meja cetak", price: 149000, desc: "Kartu QR premium dikirim untuk tiap meja." },
-  { id: "moderation", name: "Moderasi foto", price: 49000, desc: "Setujui foto sebelum tampil di galeri." },
-  { id: "custom_link", name: "Desain album kustom", price: 129000, desc: "Warna dan sampul album sesuai tema acara." },
+  { id: "slideshow", name: "Live slideshow", price: 199000, desc: "Tampilkan foto tamu langsung di layar acara." },
+  { id: "extra_photos", name: "+1.000 foto", price: 99000, desc: "Tambahan kuota foto untuk album." },
 ];
 export const ADDON_IDS = ADDONS.map((a) => a.id);
 export function isAddonId(v: unknown): v is AddonId {

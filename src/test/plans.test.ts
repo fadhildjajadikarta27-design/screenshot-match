@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PLAN_IDS, PLAN_TIERS, computeExpiresAt, isExpired, priceFor } from "@/lib/plans";
+import { ADDONS, AUDIENCE_IDS, EVENT_TYPES, PAID_PLAN_IDS, PLAN_IDS, PLAN_TIERS, computeExpiresAt, isExpired, priceFor } from "@/lib/plans";
 
 describe("plans", () => {
   it("prices differ per event type", () => {
@@ -9,9 +9,23 @@ describe("plans", () => {
     expect(priceFor("Birthday", "premium")).toBe(199000);
   });
   it("prices scale with audience size", () => {
-    expect(priceFor("Wedding", "premium", "m")).toBe(524000);
-    expect(priceFor("Wedding", "premium", "l")).toBe(698000);
-    expect(priceFor("Wedding", "premium", "xxl")).toBe(1396000);
+    expect(priceFor("Wedding", "premium", "m")).toBe(529000);
+    expect(priceFor("Wedding", "premium", "l")).toBe(699000);
+    expect(priceFor("Wedding", "premium", "xxl")).toBe(1399000);
+  });
+  it("every price ends in 9 (nanggung)", () => {
+    for (const type of EVENT_TYPES) {
+      for (const plan of PAID_PLAN_IDS) {
+        for (const aud of AUDIENCE_IDS) {
+          expect(priceFor(type, plan, aud) % 10000).toBe(9000);
+        }
+      }
+    }
+  });
+  it("only two add-ons: slideshow 199rb, extra photos 99rb", () => {
+    expect(ADDONS).toHaveLength(2);
+    expect(ADDONS.find((a) => a.id === "slideshow")?.price).toBe(199000);
+    expect(ADDONS.find((a) => a.id === "extra_photos")?.price).toBe(99000);
   });
   it("no free plan; trial is 20 free photos of Exclusive", () => {
     expect(PLAN_IDS).not.toContain("free");
