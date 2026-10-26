@@ -1,3 +1,4 @@
+import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Camera, QrCode, Images, ShieldCheck, Smartphone, Zap, Download } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
@@ -39,30 +40,31 @@ const benefits = [
 const uses = ["Weddings", "Birthdays", "Graduations", "Reunions", "Corporate events"];
 
 function Landing() {
+  const { t: tr, locale, language } = useLanguage();
   return (
     <div className="min-h-screen">
       <SiteHeader />
       <main>
         <section className="mx-auto grid max-w-6xl items-center gap-10 px-5 pb-16 pt-12 md:grid-cols-[1.05fr_1fr] md:pt-20">
           <div>
-            <p className="eyebrow">Shared event albums</p>
-            <h1 className="mt-4 font-display text-5xl leading-[1.02] md:text-7xl">Every Moment, Shared.</h1>
+            <p className="eyebrow">{tr("Shared event albums")}</p>
+            <h1 className="mt-4 font-display text-5xl leading-[1.02] md:text-7xl">{tr("Every Moment, Shared.")}</h1>
             <p className="mt-5 max-w-md text-lg text-muted-foreground">
-              One beautiful space for every photo from your event.
+              {tr("One beautiful space for every photo from your event.")}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/auth" search={{ mode: "signup" }}>Create Your Event</Link>
+                <Link to="/auth" search={{ mode: "signup" }}>{tr("Create Your Event")}</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/demo">Explore Demo</Link>
+                <Link to="/demo">{tr("Explore Demo")}</Link>
               </Button>
             </div>
           </div>
           <div className="relative">
             <img
               src={hero}
-              alt="Wedding guests laughing at golden hour"
+              alt={tr("Wedding guests laughing at golden hour")}
               width={1600}
               height={1072}
               fetchPriority="high"
@@ -71,8 +73,8 @@ function Landing() {
             <div className="absolute -bottom-5 left-5 flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-soft">
               <ApertureMark className="h-5 w-5" />
               <div className="text-sm">
-                <p className="font-medium">248 photos</p>
-                <p className="text-xs text-muted-foreground">from 61 guests</p>
+                <p className="font-medium">{tr("248 photos")}</p>
+                <p className="text-xs text-muted-foreground">{tr("from 61 guests")}</p>
               </div>
             </div>
           </div>
@@ -80,18 +82,18 @@ function Landing() {
 
         <section className="border-y border-border bg-card">
           <div className="mx-auto max-w-6xl px-5 py-16">
-            <p className="eyebrow">How it works</p>
-            <h2 className="mt-3 font-display text-4xl">Three simple steps</h2>
+            <p className="eyebrow">{tr("How it works")}</p>
+            <h2 className="mt-3 font-display text-4xl">{tr("Three simple steps")}</h2>
             <ol className="mt-10 grid gap-8 md:grid-cols-3">
               {steps.map((s, i) => (
-                <li key={s.title}>
+                <li key={tr(s.title)}>
                   <div className="flex items-center gap-3">
                     <span className="font-display text-3xl text-gold">0{i + 1}</span>
                     <span className="gold-rule" />
                   </div>
                   <s.icon className="mt-5 h-6 w-6" strokeWidth={1.4} />
-                  <h3 className="mt-3 text-lg font-medium">{s.title}</h3>
-                  <p className="mt-1 text-muted-foreground">{s.body}</p>
+                  <h3 className="mt-3 text-lg font-medium">{tr(s.title)}</h3>
+                  <p className="mt-1 text-muted-foreground">{tr(s.body)}</p>
                 </li>
               ))}
             </ol>
@@ -101,10 +103,10 @@ function Landing() {
         <section className="mx-auto max-w-6xl px-5 py-16">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="eyebrow">Gallery preview</p>
-              <h2 className="mt-3 font-display text-4xl">Everyone's view of the day</h2>
+              <p className="eyebrow">{tr("Gallery preview")}</p>
+              <h2 className="mt-3 font-display text-4xl">{tr("Everyone's view of the day")}</h2>
             </div>
-            <Link to="/demo" className="hidden text-sm underline-offset-4 hover:underline sm:inline">View demo →</Link>
+            <Link to="/demo" className="hidden text-sm underline-offset-4 hover:underline sm:inline">{tr("View demo →")}</Link>
           </div>
           <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">
             {[g1, g2, g3, g4].map((src, i) => (
@@ -116,10 +118,10 @@ function Landing() {
         <section className="mx-auto max-w-6xl px-5 pb-16">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {benefits.map((b) => (
-              <div key={b.title} className="rounded-2xl border border-border bg-card p-6">
+              <div key={tr(b.title)} className="rounded-2xl border border-border bg-card p-6">
                 <b.icon className="h-5 w-5 text-gold" strokeWidth={1.6} />
-                <h3 className="mt-4 font-medium">{b.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{b.body}</p>
+                <h3 className="mt-4 font-medium">{tr(b.title)}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{tr(b.body)}</p>
               </div>
             ))}
           </div>
@@ -127,13 +129,13 @@ function Landing() {
 
         <section className="border-t border-border bg-card">
           <div className="mx-auto max-w-6xl px-5 py-16 text-center">
-            <p className="eyebrow">Made for</p>
+            <p className="eyebrow">{tr("Made for")}</p>
             <div className="mt-5 flex flex-wrap justify-center gap-x-8 gap-y-3 font-display text-3xl">
-              {uses.map((u) => <span key={u}>{u}</span>)}
+              {uses.map((u) => <span key={tr(u)}>{tr(u)}</span>)}
             </div>
             <div className="mt-10 flex flex-wrap justify-center gap-3">
-              <Button asChild size="lg"><Link to="/auth" search={{ mode: "signup" }}>Create Your Event</Link></Button>
-              <Button asChild size="lg" variant="outline"><Link to="/pricing">See pricing</Link></Button>
+              <Button asChild size="lg"><Link to="/auth" search={{ mode: "signup" }}>{tr("Create Your Event")}</Link></Button>
+              <Button asChild size="lg" variant="outline"><Link to="/pricing">{tr("See pricing")}</Link></Button>
             </div>
           </div>
         </section>

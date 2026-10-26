@@ -1,3 +1,5 @@
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
@@ -37,6 +39,7 @@ export const Route = createFileRoute("/e/$slug")({
 const tokenKey = (slug: string) => `velora_token_${slug}`;
 
 function GuestPage() {
+  const { t: tr, locale, language } = useLanguage();
   const { slug } = Route.useParams();
   const [token, setToken] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -56,14 +59,14 @@ function GuestPage() {
     return <Shell><Skeleton className="h-48 rounded-2xl" /><Skeleton className="mt-4 h-14 rounded-full" /></Shell>;
   }
   if (evQ.error) {
-    return <Shell><p className="text-center">We couldn't load this event.</p><div className="mt-4 text-center"><Button variant="outline" onClick={() => evQ.refetch()}>Try again</Button></div></Shell>;
+    return <Shell><p className="text-center">{tr("We couldn't load this event.")}</p><div className="mt-4 text-center"><Button variant="outline" onClick={() => evQ.refetch()}>{tr("Try again")}</Button></div></Shell>;
   }
   if (!ev) {
     return (
       <Shell>
         <div className="text-center">
-          <h1 className="font-display text-4xl">Event not found</h1>
-          <p className="mt-2 text-muted-foreground">Check the link or QR code and try again.</p>
+          <h1 className="font-display text-4xl">{tr("Event not found")}</h1>
+          <p className="mt-2 text-muted-foreground">{tr("Check the link or QR code and try again.")}</p>
         </div>
       </Shell>
     );
@@ -74,12 +77,12 @@ function GuestPage() {
       {ev.coverUrl && (
         <img src={ev.coverUrl} alt="" className="mb-6 aspect-[16/10] w-full rounded-2xl object-cover shadow-soft" />
       )}
-      <p className="eyebrow">{ev.eventType ?? "Event"}</p>
+      <p className="eyebrow">{tr(ev.eventType ?? "Event")}</p>
       <h1 className="mt-2 font-display text-4xl leading-tight sm:text-5xl">{ev.title}</h1>
       {ev.eventDate && (
         <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
           <CalendarDays className="h-3.5 w-3.5" />
-          {new Date(ev.eventDate).toLocaleDateString(undefined, { dateStyle: "long" })}
+          {new Date(ev.eventDate).toLocaleDateString(locale, { dateStyle: "long" })}
         </p>
       )}
       {ev.description && <p className="mx-auto mt-3 max-w-md text-muted-foreground">{ev.description}</p>}
@@ -104,25 +107,27 @@ function GuestPage() {
   return (
     <Shell hideBranding={ev.hideBranding}>
       {header}
-      {ev.expired && <p className="mt-8 rounded-xl border border-border bg-card p-4 text-center text-sm">Album ini sudah berakhir dan tidak menerima foto baru lagi.</p>}
+      {ev.expired && <p className="mt-8 rounded-xl border border-border bg-card p-4 text-center text-sm">{tr("Album ini sudah berakhir dan tidak menerima foto baru lagi.")}</p>}
       {!ev.expired && <Uploader slug={slug} token={token} enabled={ev.uploadsEnabled} maxMb={ev.maxFileSizeMb} />}
       {ev.galleryVisible ? (
         <Gallery slug={slug} token={token} downloads={ev.downloadsEnabled} initialCount={ev.photoCount} />
       ) : (
-        <p className="mt-10 text-center text-sm text-muted-foreground">The organiser is keeping the gallery private. Your photos go straight to them.</p>
+        <p className="mt-10 text-center text-sm text-muted-foreground">{tr("The organiser is keeping the gallery private. Your photos go straight to them.")}</p>
       )}
     </Shell>
   );
 }
 
 function Shell({ children, hideBranding = false }: { children: React.ReactNode; hideBranding?: boolean }) {
+  const { t: tr, locale, language } = useLanguage();
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-6">
+        <div className="mb-4 flex justify-end"><LanguageSelector /></div>
         {!hideBranding && <div className="mb-8 flex justify-center"><Wordmark /></div>}
         {children}
         <p className="mt-16 text-center text-xs text-muted-foreground">
-          {!hideBranding && <>Powered by <Link to="/" className="underline underline-offset-2">VELORA</Link> · </>}<Link to="/privacy" className="underline underline-offset-2">Privacy</Link>
+          {!hideBranding && <>{tr("Powered by")} <Link to="/" className="underline underline-offset-2">VELORA</Link> · </>}<Link to="/privacy" className="underline underline-offset-2">{tr("Privacy")}</Link>
         </p>
       </div>
     </div>
@@ -130,6 +135,7 @@ function Shell({ children, hideBranding = false }: { children: React.ReactNode; 
 }
 
 function PinForm({ slug, onUnlocked }: { slug: string; onUnlocked: (t: string) => void }) {
+  const { t: tr, locale, language } = useLanguage();
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -142,7 +148,7 @@ function PinForm({ slug, onUnlocked }: { slug: string; onUnlocked: (t: string) =
       if (r.ok) onUnlocked(r.token);
       else setErr(r.error);
     } catch {
-      setErr("Something went wrong. Please try again.");
+      setErr(tr("Something went wrong. Please try again."));
     } finally {
       setBusy(false);
     }
@@ -150,19 +156,19 @@ function PinForm({ slug, onUnlocked }: { slug: string; onUnlocked: (t: string) =
   return (
     <form onSubmit={submit} className="mx-auto mt-8 max-w-xs rounded-2xl border border-border bg-card p-6 text-center shadow-soft">
       <Lock className="mx-auto h-5 w-5 text-gold" />
-      <p className="mt-3 font-medium">This album is protected</p>
-      <p className="text-sm text-muted-foreground">Enter the PIN from your host.</p>
+      <p className="mt-3 font-medium">{tr("This album is protected")}</p>
+      <p className="text-sm text-muted-foreground">{tr("Enter the PIN from your host.")}</p>
       <Input
         className="mt-4 text-center text-lg tracking-[0.4em]"
         inputMode="numeric"
         autoComplete="one-time-code"
-        aria-label="Event PIN"
+        aria-label={tr("Event PIN")}
         value={pin}
         onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
       />
       {err && <p role="alert" className="mt-2 text-sm text-destructive">{err}</p>}
       <Button className="mt-4 w-full" disabled={busy || pin.length < 4}>
-        {busy && <Loader2 className="animate-spin" />} Unlock
+        {busy && <Loader2 className="animate-spin" />} {tr("Unlock")}
       </Button>
     </form>
   );
@@ -183,6 +189,7 @@ type Item = {
 const CONCURRENCY = 2;
 
 function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string | null; enabled: boolean; maxMb: number }) {
+  const { t: tr, locale, language } = useLanguage();
   const [items, setItems] = useState<Item[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const running = useRef(0);
@@ -205,7 +212,7 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
         } catch {
           prepared = { file: item.file, thumb: null, width: 0, height: 0, name: item.file.name };
         }
-        if (prepared.file.size > maxMb * 1024 * 1024) throw Object.assign(new Error(`Photos must be under ${maxMb} MB.`), { retry: false });
+        if (prepared.file.size > maxMb * 1024 * 1024) throw Object.assign(new Error(language === "en" ? `Photos must be under ${maxMb} MB.` : `Ukuran foto harus di bawah ${maxMb} MB.`), { retry: false });
         const fd = new FormData();
         fd.append("slug", slug);
         if (token) fd.append("token", token);
@@ -226,10 +233,10 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
             let body: { ok?: boolean; error?: string; retry?: boolean } = {};
             try { body = JSON.parse(xhr.responseText); } catch { /* ignore */ }
             if (xhr.status >= 200 && xhr.status < 300 && body.ok) resolve();
-            else reject(Object.assign(new Error(body.error ?? "Upload failed."), { retry: body.retry ?? xhr.status >= 500 }));
+            else reject(Object.assign(new Error(body.error ?? tr("Upload failed.")), { retry: body.retry ?? xhr.status >= 500 }));
           };
-          xhr.onerror = () => reject(Object.assign(new Error("Connection lost."), { retry: true }));
-          xhr.ontimeout = () => reject(Object.assign(new Error("Upload timed out."), { retry: true }));
+          xhr.onerror = () => reject(Object.assign(new Error(tr("Connection lost.")), { retry: true }));
+          xhr.ontimeout = () => reject(Object.assign(new Error(tr("Upload timed out.")), { retry: true }));
           xhr.send(fd);
         });
         patch(item.key, { status: "done", progress: 100 });
@@ -239,7 +246,7 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
         patch(item.key, { status: "error", error: err.message, retry: err.retry !== false });
       }
     },
-    [slug, token, maxMb, patch],
+    [slug, token, maxMb, patch, language],
   );
 
   const pump = useCallback(() => {
@@ -272,7 +279,7 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
       seen.current.add(sig);
       added.push({ key: crypto.randomUUID(), file: f, preview: URL.createObjectURL(f), status: "queued", progress: 0 });
     }
-    if (rejected) toast.error(`${rejected} file(s) skipped — only JPEG, PNG and WebP are supported.`);
+    if (rejected) toast.error(language === "en" ? `${rejected} file(s) skipped — only JPEG, PNG and WebP are supported.` : `${rejected} file dilewati — hanya JPEG, PNG, dan WebP yang didukung.`);
     if (added.length) setItems((l) => [...added, ...l]);
     if (inputRef.current) inputRef.current.value = "";
   }
@@ -283,8 +290,8 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
   if (!enabled) {
     return (
       <div className="mt-8 rounded-2xl border border-border bg-card p-6 text-center">
-        <p className="font-medium">Uploads are closed</p>
-        <p className="mt-1 text-sm text-muted-foreground">The host is no longer collecting new photos for this event.</p>
+        <p className="font-medium">{tr("Uploads are closed")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{tr("The host is no longer collecting new photos for this event.")}</p>
       </div>
     );
   }
@@ -293,14 +300,14 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
     <section className="mt-8">
       <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="sr-only" id="photo-input" onChange={(e) => onFiles(e.target.files)} />
       <Button size="lg" className="h-14 w-full text-base" onClick={() => inputRef.current?.click()}>
-        <Camera className="!size-5" /> Upload Photos
+        <Camera className="!size-5" /> {tr("Upload Photos")}
       </Button>
-      <p className="mt-2 text-center text-xs text-muted-foreground">JPEG, PNG or WebP · up to {maxMb} MB each</p>
+      <p className="mt-2 text-center text-xs text-muted-foreground">{language === "en" ? `JPEG, PNG or WebP · up to ${maxMb} MB each` : `JPEG, PNG, atau WebP · hingga ${maxMb} MB per foto`}</p>
 
       {items.length > 0 && (
         <div className="mt-6 rounded-2xl border border-border bg-card p-4">
           <p className="text-sm">
-            {active > 0 ? `Uploading… ${done} of ${items.length} done` : `${done} of ${items.length} uploaded`}
+            {active > 0 ? language === "en" ? `Uploading… ${done} of ${items.length} done` : `Mengunggah… ${done} dari ${items.length} selesai` : language === "en" ? `${done} of ${items.length} uploaded` : `${done} dari ${items.length} diunggah`}
           </p>
           <ul className="mt-3 space-y-2">
             {items.map((i) => (
@@ -314,6 +321,7 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
 }
 
 const UploadRow = memo(function UploadRow({ item, onRetry, onRemove }: { item: Item; onRetry: () => void; onRemove: () => void }) {
+  const { t: tr, locale, language } = useLanguage();
   return (
     <li className="flex items-center gap-3">
       <img src={item.preview} alt="" className="h-11 w-11 shrink-0 rounded-md object-cover" />
@@ -327,12 +335,12 @@ const UploadRow = memo(function UploadRow({ item, onRetry, onRemove }: { item: I
           </div>
         )}
       </div>
-      {item.status === "done" && <Check className="h-5 w-5 text-success" aria-label="Uploaded" />}
+      {item.status === "done" && <Check className="h-5 w-5 text-success" aria-label={tr("Uploaded")} />}
       {(item.status === "uploading" || item.status === "preparing") && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
       {item.status === "error" && (
         <div className="flex">
-          {item.retry && <Button size="icon" variant="ghost" onClick={onRetry} aria-label="Retry upload"><RotateCw /></Button>}
-          <Button size="icon" variant="ghost" onClick={onRemove} aria-label="Remove"><X /></Button>
+          {item.retry && <Button size="icon" variant="ghost" onClick={onRetry} aria-label={tr("Retry upload")}><RotateCw /></Button>}
+          <Button size="icon" variant="ghost" onClick={onRemove} aria-label={tr("Remove")}><X /></Button>
         </div>
       )}
     </li>
@@ -342,6 +350,7 @@ const UploadRow = memo(function UploadRow({ item, onRetry, onRemove }: { item: I
 // ---------- Gallery ----------
 
 function Gallery({ slug, token, downloads, initialCount }: { slug: string; token: string | null; downloads: boolean; initialCount: number }) {
+  const { t: tr, locale, language } = useLanguage();
   const [fresh, setFresh] = useState<{ key: string; preview: string }[]>([]);
   const [open, setOpen] = useState<number | null>(null);
   const sentinel = useRef<HTMLDivElement>(null);
@@ -386,7 +395,7 @@ function Gallery({ slug, token, downloads, initialCount }: { slug: string; token
     if (!p) return;
     const { url } = await getPhotoUrl({ data: { slug, token, photoId: p.id, download: true } });
     if (url) window.location.href = url;
-    else toast.error("Download isn't available");
+    else toast.error(tr("Download isn't available"));
   }, [photos, slug, token]);
 
   const count = initialCount + fresh.length;
@@ -394,21 +403,21 @@ function Gallery({ slug, token, downloads, initialCount }: { slug: string; token
   return (
     <section className="mt-12">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-display text-3xl">Gallery</h2>
-        <span className="text-sm text-muted-foreground">{count} {count === 1 ? "photo" : "photos"}</span>
+        <h2 className="font-display text-3xl">{tr("Gallery")}</h2>
+        <span className="text-sm text-muted-foreground">{count} {count === 1 ? tr("photo") : tr("photos")}</span>
       </div>
       {fresh.length > 0 && (
         <div className="mt-4">
-          <p className="eyebrow">Just added by you</p>
+          <p className="eyebrow">{tr("Just added by you")}</p>
           <div className="mt-2 grid grid-cols-3 gap-1.5 sm:grid-cols-4">
             {fresh.map((f) => <img key={f.key} src={f.preview} alt="" className="aspect-square w-full rounded-md object-cover" />)}
           </div>
         </div>
       )}
       {q.isLoading && <div className="mt-4 grid grid-cols-3 gap-1.5 sm:grid-cols-4">{Array.from({ length: 9 }).map((_, i) => <Skeleton key={i} className="aspect-square" />)}</div>}
-      {q.error && <div className="mt-4 text-center"><p className="text-sm">Couldn't load the gallery.</p><Button variant="outline" className="mt-2" onClick={() => q.refetch()}>Retry</Button></div>}
+      {q.error && <div className="mt-4 text-center"><p className="text-sm">{tr("Couldn't load the gallery.")}</p><Button variant="outline" className="mt-2" onClick={() => q.refetch()}>{tr("Retry")}</Button></div>}
       {!q.isLoading && !q.error && photos.length === 0 && fresh.length === 0 && (
-        <p className="mt-4 rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">No photos yet — be the first to share one.</p>
+        <p className="mt-4 rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">{tr("No photos yet — be the first to share one.")}</p>
       )}
       {photos.length > 0 && (
         <div className="mt-4 grid grid-cols-3 gap-1.5 sm:grid-cols-4">
@@ -425,7 +434,7 @@ function Gallery({ slug, token, downloads, initialCount }: { slug: string; token
           onClose={() => setOpen(null)}
           resolveUrl={resolve}
           onDownload={downloads ? download : undefined}
-          caption={(i) => (photos[i]?.uploadedAt ? new Date(photos[i]!.uploadedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "")}
+          caption={(i) => (photos[i]?.uploadedAt ? new Date(photos[i]?.uploadedAt ?? "").toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" }) : "")}
         />
       )}
     </section>
@@ -433,9 +442,10 @@ function Gallery({ slug, token, downloads, initialCount }: { slug: string; token
 }
 
 const Tile = memo(function Tile({ photo, index, onOpen }: { photo: PublicPhoto; index: number; onOpen: (i: number) => void }) {
+  const { t: tr, locale, language } = useLanguage();
   const [failed, setFailed] = useState(false);
   return (
-    <button onClick={() => onOpen(index)} className="block overflow-hidden rounded-md bg-muted focus-visible:outline-2 focus-visible:outline-ring" aria-label={`Open photo ${index + 1}`}>
+    <button onClick={() => onOpen(index)} className="block overflow-hidden rounded-md bg-muted focus-visible:outline-2 focus-visible:outline-ring" aria-label={`${language === "en" ? "Open photo" : "Buka foto"} ${index + 1}`}>
       {photo.thumbUrl && !failed ? (
         <img src={photo.thumbUrl} alt="" loading="lazy" decoding="async" width={240} height={240} onError={() => setFailed(true)} className="aspect-square w-full object-cover" />
       ) : (

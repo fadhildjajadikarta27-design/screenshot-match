@@ -1,3 +1,5 @@
+import { formatDuration, formatPrice } from "@/lib/locale-format";
+import { useLanguage } from "@/components/LanguageProvider";
 import { useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2 } from "lucide-react";
@@ -11,7 +13,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
 import { EVENT_TYPES, type EventRecord } from "./AdminShell";
-import { ADDONS, AUDIENCE, AUDIENCE_IDS, EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, formatRupiah, isAddonId, isAudienceId, isPlanId, priceFor, type AddonId, type AudienceId, type PlanId } from "@/lib/plans";
+import { ADDONS, AUDIENCE, AUDIENCE_IDS, EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, isAddonId, isAudienceId, isPlanId, priceFor, type AddonId, type AudienceId, type PlanId } from "@/lib/plans";
 import { PackageAdvisor } from "./PackageAdvisor";
 
 type Props = { initial?: EventRecord; onSaved: (r: { id: string; slug: string }) => void };
@@ -21,6 +23,7 @@ function toLocalDate(iso: string | null | undefined) {
 }
 
 export function EventForm({ initial, onSaved }: Props) {
+  const { t: tr, locale, language } = useLanguage();
   const save = useServerFn(saveEvent);
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
@@ -48,13 +51,13 @@ export function EventForm({ initial, onSaved }: Props) {
   async function uploadCover(eventId: string): Promise<string | null> {
     if (!cover) return null;
     if (!["image/jpeg", "image/png", "image/webp"].includes(cover.type) || cover.size > 8 * 1024 * 1024) {
-      toast.error("Cover must be a JPEG, PNG or WebP under 8 MB");
+      toast.error(tr("Cover must be a JPEG, PNG or WebP under 8 MB"));
       return null;
     }
     const path = `${eventId}/cover/${crypto.randomUUID()}`;
     const { error } = await supabase.storage.from("event-photos").upload(path, cover, { contentType: cover.type });
     if (error) {
-      toast.error("Cover upload failed");
+      toast.error(tr("Cover upload failed"));
       return null;
     }
     return path;
@@ -62,8 +65,8 @@ export function EventForm({ initial, onSaved }: Props) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!SLUG_RE.test(slug)) { toast.error("Link must be 3–60 lowercase letters, numbers or dashes."); return; }
-    if ((needsPin || pin) && !PIN_RE.test(pin)) { toast.error("PIN must be 4–8 digits."); return; }
+    if (!SLUG_RE.test(slug)) { toast.error(tr("Link must be 3–60 lowercase letters, numbers or dashes.")); return; }
+    if ((needsPin || pin) && !PIN_RE.test(pin)) { toast.error(tr("PIN must be 4–8 digits.")); return; }
     setBusy(true);
     const base = {
       title,
@@ -93,10 +96,10 @@ export function EventForm({ initial, onSaved }: Props) {
           if (!res.ok) throw new Error(res.error);
         }
       }
-      toast.success(initial ? "Event saved" : "Event created");
+      toast.success(initial ? tr("Event saved") : tr("Event created"));
       onSaved({ id: res.id, slug: res.slug });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not save");
+      toast.error(err instanceof Error ? err.message : tr("Could not save"));
     } finally {
       setBusy(false);
     }
@@ -105,13 +108,13 @@ export function EventForm({ initial, onSaved }: Props) {
   return (
     <form onSubmit={submit} className="space-y-8">
       <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
-        <h2 className="font-display text-2xl">Details</h2>
+        <h2 className="font-display text-2xl">{tr("Details")}</h2>
         <div className="space-y-1.5">
-          <Label htmlFor="title">Event title</Label>
+          <Label htmlFor="title">{tr("Event title")}</Label>
           <Input id="title" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }} placeholder="Ayu & Bima" />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="slug">Event link</Label>
+          <Label htmlFor="slug">{tr("Event link")}</Label>
           <div className="flex items-center rounded-md border border-input bg-background pl-3 text-sm focus-within:ring-1 focus-within:ring-ring">
             <span className="text-muted-foreground">/e/</span>
             <input id="slug" required value={slug} onChange={(e) => { setSlugTouched(true); setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")); }} className="h-11 flex-1 bg-transparent px-1 outline-none" />
@@ -119,38 +122,38 @@ export function EventForm({ initial, onSaved }: Props) {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="type">Category</Label>
+            <Label htmlFor="type">{tr("Category")}</Label>
             <select id="type" value={eventType ?? ""} onChange={(e) => setEventType(e.target.value)} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-              {EVENT_TYPES.map((t) => <option key={t} value={t}>{EVENT_TYPE_LABELS[t]}</option>)}
+              {EVENT_TYPES.map((t) => <option key={t} value={t}>{tr(EVENT_TYPE_LABELS[t])}</option>)}
             </select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{tr("Date")}</Label>
             <Input id="date" type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="desc">Description (optional)</Label>
+          <Label htmlFor="desc">{tr("Description (optional)")}</Label>
           <Textarea id="desc" maxLength={1000} value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="cover">Cover image (optional)</Label>
+          <Label htmlFor="cover">{tr("Cover image (optional)")}</Label>
           <Input id="cover" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setCover(e.target.files?.[0] ?? null)} />
         </div>
       </section>
 
       <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
         <div>
-          <h2 className="font-display text-2xl">Paket</h2>
-          <p className="text-sm text-muted-foreground">Harga untuk {EVENT_TYPE_LABELS[eventType ?? "Other"] ?? "acara ini"}, menyesuaikan jumlah tamu. Pembayaran segera hadir.</p>
+          <h2 className="font-display text-2xl">{tr("Paket")}</h2>
+          <p className="text-sm text-muted-foreground">{language === "en" ? "Pricing for" : "Harga untuk"} {tr(EVENT_TYPE_LABELS[eventType ?? "Other"] ?? "acara ini")}{language === "en" ? " varies by guest count. Payments are coming soon." : ", menyesuaikan jumlah tamu. Pembayaran segera hadir."}</p>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="aud">Perkiraan jumlah tamu</Label>
+          <Label htmlFor="aud">{tr("Perkiraan jumlah tamu")}</Label>
           <select id="aud" value={audience} onChange={(e) => setAudience(e.target.value as AudienceId)} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-            {AUDIENCE_IDS.map((a) => <option key={a} value={a}>{AUDIENCE[a].label}</option>)}
+            {AUDIENCE_IDS.map((a) => <option key={a} value={a}>{tr(AUDIENCE[a].label)}</option>)}
           </select>
         </div>
-        <PackageAdvisor eventType={eventType ?? "Other"} audience={audience} onApply={(p, a) => { setPlan(p); setAddons(a); toast.success("Rekomendasi diterapkan"); }} />
+        <PackageAdvisor eventType={eventType ?? "Other"} audience={audience} onApply={(p, a) => { setPlan(p); setAddons(a); toast.success(tr("Rekomendasi diterapkan")); }} />
         <div className="grid gap-3 sm:grid-cols-2">
           {PLAN_IDS.map((id) => {
             const t = PLAN_TIERS[id];
@@ -158,89 +161,91 @@ export function EventForm({ initial, onSaved }: Props) {
               <label key={id} className={`cursor-pointer rounded-xl border p-4 ${plan === id ? "border-gold bg-accent/50" : "border-border"}`}>
                 <input type="radio" name="plan" className="sr-only" checked={plan === id} onChange={() => setPlan(id)} />
                 <div className="flex items-baseline justify-between gap-2">
-                  <p className="font-medium">{t.name}</p>
-                  <p className="font-display text-lg">{formatRupiah(priceFor(eventType, id, audience))}</p>
+                  <p className="font-medium">{tr(t.name)}</p>
+                  <p className="font-display text-lg">{formatPrice(priceFor(eventType, id, audience), language)}</p>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">{blurbFor(eventType, id)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{tr(blurbFor(eventType, id))}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {`${t.maxPhotos.toLocaleString("id-ID")} foto`} · aktif {t.activeDays >= 365 ? "1 tahun" : t.activeDays >= 180 ? "6 bulan" : `${t.activeDays} hari`}
-                  {t.zipDownload ? " · unduh ZIP" : ""}{t.hideBranding ? " · tanpa logo" : ""}
+                  {t.maxPhotos.toLocaleString(locale)} {tr("photos")} · {tr("active for")} {formatDuration(t.activeDays, language)}
+                  {t.zipDownload ? tr(" · unduh ZIP") : ""}{t.hideBranding ? tr(" · tanpa logo") : ""}
                 </p>
               </label>
             );
           })}
         </div>
         <div className="space-y-2">
-          <p className="font-medium">Add-on</p>
+          <p className="font-medium">{tr("Add-on")}</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {ADDONS.map((a) => {
               const on = addons.includes(a.id);
               return (
                 <label key={a.id} className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${on ? "border-gold bg-accent/50" : "border-border"}`}>
                   <input type="checkbox" checked={on} onChange={() => setAddons(on ? addons.filter((x) => x !== a.id) : [...addons, a.id])} className="mt-1 accent-[var(--color-gold)]" />
-                  <span className="text-sm"><span className="font-medium">{a.name}</span> · {formatRupiah(a.price)}<span className="block text-muted-foreground">{a.desc}</span></span>
+                  <span className="text-sm"><span className="font-medium">{tr(a.name)}</span> · {formatPrice(a.price, language)}<span className="block text-muted-foreground">{tr(a.desc)}</span></span>
                 </label>
               );
             })}
           </div>
         </div>
-        <p className="text-right">Total: <span className="font-display text-2xl">{formatRupiah(total)}</span></p>
+        <p className="text-right">Total: <span className="font-display text-2xl">{formatPrice(total, language)}</span></p>
       </section>
 
       <section className="space-y-5 rounded-2xl border border-border bg-card p-6">
-        <h2 className="font-display text-2xl">Access</h2>
+        <h2 className="font-display text-2xl">{tr("Access")}</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {(["public", "pin"] as const).map((p) => (
             <label key={p} className={`cursor-pointer rounded-xl border p-4 ${privacy === p ? "border-gold bg-accent/50" : "border-border"}`}>
               <input type="radio" name="privacy" className="sr-only" checked={privacy === p} onChange={() => setPrivacy(p)} />
-              <p className="font-medium">{p === "public" ? "Anyone with the link" : "PIN protected"}</p>
-              <p className="text-sm text-muted-foreground">{p === "public" ? "Guests open the album straight away." : "Guests enter a PIN before viewing or uploading."}</p>
+              <p className="font-medium">{p === "public" ? tr("Anyone with the link") : tr("PIN protected")}</p>
+              <p className="text-sm text-muted-foreground">{p === "public" ? tr("Guests open the album straight away.") : tr("Guests enter a PIN before viewing or uploading.")}</p>
             </label>
           ))}
         </div>
         {privacy === "pin" && (
           <div className="space-y-1.5">
-            <Label htmlFor="pin">{needsPin ? "PIN (4–8 digits)" : "New PIN (leave blank to keep current)"}</Label>
+            <Label htmlFor="pin">{needsPin ? tr("PIN (4–8 digits)") : tr("New PIN (leave blank to keep current)")}</Label>
             <Input id="pin" inputMode="numeric" autoComplete="off" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 8))} required={needsPin} />
           </div>
         )}
-        <Toggle label="Allow uploads" hint="Turn off to close the album to new photos." checked={uploadsEnabled} onChange={setUploads} />
-        <Toggle label="Show gallery to guests" hint="Guests can browse everyone's photos." checked={galleryVisible} onChange={setGallery} />
-        <Toggle label="Allow downloads" hint="Guests can download full-size photos." checked={downloadsEnabled} onChange={setDownloads} />
+        <Toggle label={tr("Allow uploads")} hint={tr("Turn off to close the album to new photos.")} checked={uploadsEnabled} onChange={setUploads} />
+        <Toggle label={tr("Show gallery to guests")} hint={tr("Guests can browse everyone's photos.")} checked={galleryVisible} onChange={setGallery} />
+        <Toggle label={tr("Allow downloads")} hint={tr("Guests can download full-size photos.")} checked={downloadsEnabled} onChange={setDownloads} />
       </section>
 
       <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
-        <h2 className="font-display text-2xl">Limits</h2>
+        <h2 className="font-display text-2xl">{tr("Limits")}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <NumberField id="mf" label="Max photo size (MB)" min={1} max={25} value={maxFileSizeMb} onChange={setMaxFile} />
-          <NumberField id="mg" label="Max photos per guest" min={1} max={500} value={maxUploadsPerGuest} onChange={setMaxGuest} />
+          <NumberField id="mf" label={tr("Max photo size (MB)")} min={1} max={25} value={maxFileSizeMb} onChange={setMaxFile} />
+          <NumberField id="mg" label={tr("Max photos per guest")} min={1} max={500} value={maxUploadsPerGuest} onChange={setMaxGuest} />
         </div>
       </section>
 
       <Button type="submit" size="lg" disabled={busy}>
         {busy && <Loader2 className="animate-spin" />}
-        {initial ? "Save changes" : "Create event"}
+        {initial ? tr("Save changes") : tr("Create event")}
       </Button>
     </form>
   );
 }
 
 function Toggle({ label, hint, checked, onChange }: { label: string; hint: string; checked: boolean; onChange: (v: boolean) => void }) {
+  const { t: tr, locale, language } = useLanguage();
   return (
     <label className="flex cursor-pointer items-center justify-between gap-4">
       <span>
-        <span className="block font-medium">{label}</span>
-        <span className="block text-sm text-muted-foreground">{hint}</span>
+        <span className="block font-medium">{tr(label)}</span>
+        <span className="block text-sm text-muted-foreground">{tr(hint)}</span>
       </span>
-      <Switch checked={checked} onCheckedChange={onChange} aria-label={label} />
+      <Switch checked={checked} onCheckedChange={onChange} aria-label={tr(label)} />
     </label>
   );
 }
 
 function NumberField({ id, label, min, max, value, onChange }: { id: string; label: string; min: number; max: number; value: number; onChange: (n: number) => void }) {
+  const { t: tr, locale, language } = useLanguage();
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id}>{tr(label)}</Label>
       <Input id={id} type="number" min={min} max={max} required value={value} onChange={(e) => onChange(Math.max(min, Math.min(max, Number(e.target.value) || min)))} />
     </div>
   );

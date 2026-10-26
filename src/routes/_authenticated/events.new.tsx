@@ -1,3 +1,4 @@
+import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { AdminShell } from "@/components/AdminShell";
@@ -19,12 +20,13 @@ export const Route = createFileRoute("/_authenticated/events/new")({
 });
 
 function NewEvent() {
+  const { t: tr, locale, language } = useLanguage();
   const navigate = useNavigate();
   const qc = useQueryClient();
   return (
     <AdminShell>
-      <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← Events</Link>
-      <h1 className="mt-3 font-display text-4xl">Create an event</h1>
+      <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">{tr("← Events")}</Link>
+      <h1 className="mt-3 font-display text-4xl">{tr("Create an event")}</h1>
       <div className="mt-8 max-w-2xl">
         <EventForm
           onSaved={({ id }) => {
