@@ -23,12 +23,14 @@ export type Database = {
           downloads_enabled: boolean
           event_date: string | null
           event_type: string | null
+          expires_at: string | null
           gallery_visible: boolean
           id: string
           max_file_size_mb: number
           max_photos: number
           max_uploads_per_guest: number
           owner_id: string
+          plan: string
           privacy: string
           slug: string
           title: string
@@ -42,12 +44,14 @@ export type Database = {
           downloads_enabled?: boolean
           event_date?: string | null
           event_type?: string | null
+          expires_at?: string | null
           gallery_visible?: boolean
           id?: string
           max_file_size_mb?: number
           max_photos?: number
           max_uploads_per_guest?: number
           owner_id: string
+          plan?: string
           privacy?: string
           slug: string
           title: string
@@ -61,12 +65,14 @@ export type Database = {
           downloads_enabled?: boolean
           event_date?: string | null
           event_type?: string | null
+          expires_at?: string | null
           gallery_visible?: boolean
           id?: string
           max_file_size_mb?: number
           max_photos?: number
           max_uploads_per_guest?: number
           owner_id?: string
+          plan?: string
           privacy?: string
           slug?: string
           title?: string
