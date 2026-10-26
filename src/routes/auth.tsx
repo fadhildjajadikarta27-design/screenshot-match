@@ -1,3 +1,4 @@
+import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const { t: tr, locale, language } = useLanguage();
   const search = Route.useSearch();
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>(search.mode ?? "signin");
@@ -66,16 +68,16 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin + "/dashboard", data: { display_name: name } },
         });
         if (error) throw error;
-        if (!data.session) setNotice("Check your inbox to confirm your email, then sign in.");
+        if (!data.session) setNotice(tr("Check your inbox to confirm your email, then sign in."));
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
-        setNotice("If an account exists, a reset link is on its way.");
+        setNotice(tr("If an account exists, a reset link is on its way."));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : tr("Something went wrong"));
     } finally {
       setBusy(false);
     }
@@ -83,21 +85,21 @@ function AuthPage() {
 
   async function google() {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
-    if (r.error) toast.error("Google sign-in failed");
+    if (r.error) toast.error(tr("Google sign-in failed"));
   }
 
-  const title = mode === "signin" ? "Welcome back" : mode === "signup" ? "Create your account" : "Reset your password";
+  const title = mode === "signin" ? tr("Welcome back") : mode === "signup" ? tr("Create your account") : tr("Reset your password");
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-5 py-10">
       <Wordmark />
       <div className="mt-8 w-full max-w-sm rounded-2xl border border-border bg-card p-7 shadow-soft">
-        <h1 className="font-display text-3xl">{title}</h1>
+        <h1 className="font-display text-3xl">{tr(title)}</h1>
         {notice && <p role="status" className="mt-4 rounded-lg bg-accent p-3 text-sm">{notice}</p>}
         <form onSubmit={submit} className="mt-6 space-y-4">
           {mode === "signup" && (
             <div className="space-y-1.5">
-              <Label htmlFor="name">Your name</Label>
+              <Label htmlFor="name">{tr("Your name")}</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
             </div>
           )}
@@ -108,10 +110,10 @@ function AuthPage() {
           {mode !== "forgot" && (
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{tr("Password")}</Label>
                 {mode === "signin" && (
                   <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setMode("forgot")}>
-                    Forgot?
+                    {tr("Forgot?")}
                   </button>
                 )}
               </div>
@@ -120,26 +122,26 @@ function AuthPage() {
           )}
           <Button type="submit" className="w-full" disabled={busy}>
             {busy && <Loader2 className="animate-spin" />}
-            {mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send reset link"}
+            {mode === "signin" ? tr("Sign in") : mode === "signup" ? tr("Create account") : tr("Send reset link")}
           </Button>
         </form>
         {mode !== "forgot" && (
           <>
-            <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" /></div>
-            <Button variant="outline" className="w-full" onClick={google}>Continue with Google</Button>
+            <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground"><span className="h-px flex-1 bg-border" />{tr("or")}<span className="h-px flex-1 bg-border" /></div>
+            <Button variant="outline" className="w-full" onClick={google}>{tr("Continue with Google")}</Button>
           </>
         )}
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {mode === "signup" ? (
-            <>Already have an account? <button className="text-foreground underline" onClick={() => setMode("signin")}>Sign in</button></>
+            <>{tr("Already have an account?")} <button className="text-foreground underline" onClick={() => setMode("signin")}>{tr("Sign in")}</button></>
           ) : mode === "signin" ? (
-            <>New to VELORA? <button className="text-foreground underline" onClick={() => setMode("signup")}>Create an account</button></>
+            <>{tr("New to VELORA?")} <button className="text-foreground underline" onClick={() => setMode("signup")}>{tr("Create an account")}</button></>
           ) : (
-            <button className="text-foreground underline" onClick={() => setMode("signin")}>Back to sign in</button>
+            <button className="text-foreground underline" onClick={() => setMode("signin")}>{tr("Back to sign in")}</button>
           )}
         </p>
       </div>
-      <Link to="/" className="mt-6 text-sm text-muted-foreground hover:text-foreground">← Back to home</Link>
+      <Link to="/" className="mt-6 text-sm text-muted-foreground hover:text-foreground">{tr("← Back to home")}</Link>
     </div>
   );
 }

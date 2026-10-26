@@ -1,3 +1,4 @@
+import { useLanguage } from "@/components/LanguageProvider";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, X, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function Lightbox({ count, index, onIndex, onClose, resolveUrl, onDownload, caption }: Props) {
+  const { t: tr, locale, language } = useLanguage();
   const [url, setUrl] = useState<string | null>(null);
   const [state, setState] = useState<"loading" | "ok" | "error">("loading");
   const resolveRef = useRef(resolveUrl);
@@ -54,7 +56,7 @@ export function Lightbox({ count, index, onIndex, onClose, resolveUrl, onDownloa
   const close = onClose;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Photo viewer" className="fixed inset-0 z-50 flex flex-col bg-foreground">
+    <div role="dialog" aria-modal="true" aria-label={tr("Photo viewer")} className="fixed inset-0 z-50 flex flex-col bg-foreground">
       <div className="flex items-center justify-between p-3 text-primary-foreground">
         <span className="text-sm opacity-80">
           {index + 1} / {count}
@@ -62,18 +64,18 @@ export function Lightbox({ count, index, onIndex, onClose, resolveUrl, onDownloa
         </span>
         <div className="flex gap-1">
           {onDownload && (
-            <Button size="icon" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" onClick={() => onDownload(index)} aria-label="Download">
+            <Button size="icon" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" onClick={() => onDownload(index)} aria-label={tr("Download")}>
               <Download />
             </Button>
           )}
-          <Button size="icon" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" onClick={close} aria-label="Close">
+          <Button size="icon" variant="ghost" className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground" onClick={close} aria-label={tr("Close")}>
             <X />
           </Button>
         </div>
       </div>
       <div className="relative flex flex-1 items-center justify-center overflow-hidden px-2 pb-4">
         {state === "loading" && <Loader2 className="absolute h-6 w-6 animate-spin text-primary-foreground/70" />}
-        {state === "error" && <p className="text-sm text-primary-foreground/80">This photo couldn't be loaded.</p>}
+        {state === "error" && <p className="text-sm text-primary-foreground/80">{tr("This photo couldn't be loaded.")}</p>}
         {url && (
           <img
             key={url}
@@ -85,12 +87,12 @@ export function Lightbox({ count, index, onIndex, onClose, resolveUrl, onDownloa
           />
         )}
         {index > 0 && (
-          <button onClick={() => onIndex(index - 1)} aria-label="Previous photo" className="absolute left-2 rounded-full bg-primary-foreground/10 p-3 text-primary-foreground hover:bg-primary-foreground/20">
+          <button onClick={() => onIndex(index - 1)} aria-label={tr("Previous photo")} className="absolute left-2 rounded-full bg-primary-foreground/10 p-3 text-primary-foreground hover:bg-primary-foreground/20">
             <ChevronLeft className="h-5 w-5" />
           </button>
         )}
         {index < count - 1 && (
-          <button onClick={() => onIndex(index + 1)} aria-label="Next photo" className="absolute right-2 rounded-full bg-primary-foreground/10 p-3 text-primary-foreground hover:bg-primary-foreground/20">
+          <button onClick={() => onIndex(index + 1)} aria-label={tr("Next photo")} className="absolute right-2 rounded-full bg-primary-foreground/10 p-3 text-primary-foreground hover:bg-primary-foreground/20">
             <ChevronRight className="h-5 w-5" />
           </button>
         )}

@@ -1,3 +1,4 @@
+import { useLanguage } from "@/components/LanguageProvider";
 import type { ReactNode } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
@@ -6,6 +7,7 @@ import { Wordmark } from "./Logo";
 import { Button } from "./ui/button";
 
 export function AdminShell({ children }: { children: ReactNode }) {
+  const { t: tr, locale, language } = useLanguage();
   const navigate = useNavigate();
   return (
     <div className="min-h-screen">
@@ -13,7 +15,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           <Wordmark />
           <div className="flex items-center gap-1">
-            <Link to="/dashboard" className="px-3 text-sm text-muted-foreground hover:text-foreground">Events</Link>
+            <Link to="/dashboard" className="px-3 text-sm text-muted-foreground hover:text-foreground">{tr("Events")}</Link>
             <Button
               variant="ghost"
               size="sm"
@@ -22,7 +24,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 navigate({ to: "/" });
               }}
             >
-              <LogOut /> Sign out
+              <LogOut /> {tr("Sign out")}
             </Button>
           </div>
         </div>

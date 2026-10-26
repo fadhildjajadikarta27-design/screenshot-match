@@ -1,3 +1,4 @@
+import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/reset-password")({
 });
 
 function Reset() {
+  const { t: tr, locale, language } = useLanguage();
   const navigate = useNavigate();
   const [pw, setPw] = useState("");
   const [busy, setBusy] = useState(false);
@@ -32,19 +34,19 @@ function Reset() {
     const { error } = await supabase.auth.updateUser({ password: pw });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    toast.success("Password updated");
+    toast.success(tr("Password updated"));
     navigate({ to: "/dashboard" });
   }
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-5">
       <Wordmark />
       <form onSubmit={submit} className="mt-8 w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-7 shadow-soft">
-        <h1 className="font-display text-3xl">Set a new password</h1>
+        <h1 className="font-display text-3xl">{tr("Set a new password")}</h1>
         <div className="space-y-1.5">
-          <Label htmlFor="pw">New password</Label>
+          <Label htmlFor="pw">{tr("New password")}</Label>
           <Input id="pw" type="password" minLength={8} required value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" />
         </div>
-        <Button className="w-full" disabled={busy}>Update password</Button>
+        <Button className="w-full" disabled={busy}>{tr("Update password")}</Button>
       </form>
     </div>
   );

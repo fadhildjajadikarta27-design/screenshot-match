@@ -1,3 +1,4 @@
+import { useLanguage } from "@/components/LanguageProvider";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Images, Lock, Globe, CalendarDays } from "lucide-react";
@@ -50,6 +51,7 @@ async function fetchEvents(): Promise<Row[]> {
 }
 
 function Dashboard() {
+  const { t: tr, locale, language } = useLanguage();
   const { data, isLoading, error, refetch } = useQuery({ queryKey: ["my-events"], queryFn: fetchEvents });
   const totalBytes = (data ?? []).reduce((a, r) => a + r.bytes, 0);
 
@@ -57,13 +59,13 @@ function Dashboard() {
     <AdminShell>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">Dashboard</p>
-          <h1 className="mt-2 font-display text-4xl">Your events</h1>
+          <p className="eyebrow">{tr("Dashboard")}</p>
+          <h1 className="mt-2 font-display text-4xl">{tr("Your events")}</h1>
           {data && data.length > 0 && (
             <p className="mt-1 text-sm text-muted-foreground">{data.length} events · {formatBytes(totalBytes)} stored</p>
           )}
         </div>
-        <Button asChild><Link to="/events/new"><Plus /> New event</Link></Button>
+        <Button asChild><Link to="/events/new"><Plus /> {tr("New event")}</Link></Button>
       </div>
 
       {isLoading && (
@@ -73,16 +75,16 @@ function Dashboard() {
       )}
       {error && (
         <div className="mt-8 rounded-2xl border border-border bg-card p-6">
-          <p>We couldn't load your events.</p>
-          <Button variant="outline" className="mt-3" onClick={() => refetch()}>Try again</Button>
+          <p>{tr("We couldn't load your events.")}</p>
+          <Button variant="outline" className="mt-3" onClick={() => refetch()}>{tr("Try again")}</Button>
         </div>
       )}
       {data && data.length === 0 && (
         <div className="mt-10 rounded-2xl border border-dashed border-border bg-card px-6 py-16 text-center">
           <Images className="mx-auto h-8 w-8 text-gold" strokeWidth={1.4} />
-          <h2 className="mt-4 font-display text-3xl">No events yet</h2>
-          <p className="mx-auto mt-2 max-w-sm text-muted-foreground">Create your first event to get a QR code your guests can scan.</p>
-          <Button asChild className="mt-6"><Link to="/events/new"><Plus /> Create your first event</Link></Button>
+          <h2 className="mt-4 font-display text-3xl">{tr("No events yet")}</h2>
+          <p className="mx-auto mt-2 max-w-sm text-muted-foreground">{tr("Create your first event to get a QR code your guests can scan.")}</p>
+          <Button asChild className="mt-6"><Link to="/events/new"><Plus /> {tr("Create your first event")}</Link></Button>
         </div>
       )}
       {data && data.length > 0 && (
@@ -100,17 +102,17 @@ function Dashboard() {
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2">
                     <h2 className="font-display text-2xl leading-tight">{e.title}</h2>
-                    {e.privacy === "pin" ? <Lock className="h-4 w-4 text-muted-foreground" aria-label="PIN protected" /> : <Globe className="h-4 w-4 text-muted-foreground" aria-label="Public" />}
+                    {e.privacy === "pin" ? <Lock className="h-4 w-4 text-muted-foreground" aria-label={tr("PIN protected")} /> : <Globe className="h-4 w-4 text-muted-foreground" aria-label={tr("Public")} />}
                   </div>
                   <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <CalendarDays className="h-3.5 w-3.5" />
-                    {e.event_date ? new Date(e.event_date).toLocaleDateString(undefined, { dateStyle: "medium" }) : "No date"}
+                    {e.event_date ? new Date(e.event_date).toLocaleDateString(locale, { dateStyle: "medium" }) : tr("No date")}
                     {e.event_type ? ` · ${e.event_type}` : ""}
                   </p>
                   <div className="mt-4 flex items-center justify-between text-sm">
                     <span>{e.photoCount} photos · {formatBytes(e.bytes)}</span>
                     <span className={`rounded-full px-2.5 py-0.5 text-xs ${e.uploads_enabled ? "bg-accent text-foreground" : "bg-muted text-muted-foreground"}`}>
-                      {e.uploads_enabled ? "Uploads open" : "Uploads closed"}
+                      {e.uploads_enabled ? tr("Uploads open") : tr("Uploads closed")}
                     </span>
                   </div>
                 </div>
