@@ -17,6 +17,8 @@ export type Database = {
       events: {
         Row: {
           access_pin_hash: string | null
+          addons: string[]
+          audience_size: string
           cover_image_path: string | null
           created_at: string | null
           description: string | null
@@ -38,6 +40,8 @@ export type Database = {
         }
         Insert: {
           access_pin_hash?: string | null
+          addons?: string[]
+          audience_size?: string
           cover_image_path?: string | null
           created_at?: string | null
           description?: string | null
@@ -59,6 +63,8 @@ export type Database = {
         }
         Update: {
           access_pin_hash?: string | null
+          addons?: string[]
+          audience_size?: string
           cover_image_path?: string | null
           created_at?: string | null
           description?: string | null
