@@ -13,7 +13,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
 import { EVENT_TYPES, type EventRecord } from "./AdminShell";
-import { ADDONS, AUDIENCE, AUDIENCE_IDS, EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, formatRupiah, isAddonId, isAudienceId, isPlanId, priceFor, type AddonId, type AudienceId, type PlanId } from "@/lib/plans";
+import { ADDONS, AUDIENCE, AUDIENCE_IDS, EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, isAddonId, isAudienceId, isPlanId, priceFor, type AddonId, type AudienceId, type PlanId } from "@/lib/plans";
 import { PackageAdvisor } from "./PackageAdvisor";
 
 type Props = { initial?: EventRecord; onSaved: (r: { id: string; slug: string }) => void };

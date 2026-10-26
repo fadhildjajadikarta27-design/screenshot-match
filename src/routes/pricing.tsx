@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Check, Minus } from "lucide-react";
 import { InfoPage, metaFor } from "@/components/InfoPage";
 import { Button } from "@/components/ui/button";
-import { ADDONS, AUDIENCE, AUDIENCE_IDS, EVENT_TYPES, EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, formatRupiah, priceFor, type AudienceId } from "@/lib/plans";
+import { ADDONS, AUDIENCE, AUDIENCE_IDS, EVENT_TYPES, EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, priceFor, type AudienceId } from "@/lib/plans";
 
 export const Route = createFileRoute("/pricing")({
   head: () => metaFor("Harga paket", "Paket VELORA per acara untuk wedding, wisuda, ulang tahun, dan lainnya."),

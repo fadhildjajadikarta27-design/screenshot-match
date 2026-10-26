@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Sparkles } from "lucide-react";
 import { recommendPackage, type Recommendation } from "@/lib/recommend.functions";
-import { ADDONS, PLAN_TIERS, formatRupiah, priceFor, type AddonId, type AudienceId, type PlanId } from "@/lib/plans";
+import { ADDONS, PLAN_TIERS, priceFor, type AddonId, type AudienceId, type PlanId } from "@/lib/plans";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 
