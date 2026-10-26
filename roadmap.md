@@ -1,0 +1,2 @@
+- [ ] Add persistent Indonesian/English language selection across public and organizer pages.
+- [ ] Translate package labels and verify language switching and pricing.
