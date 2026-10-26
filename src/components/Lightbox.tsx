@@ -41,23 +41,17 @@ export function Lightbox({ count, index, onIndex, onClose, resolveUrl, onDownloa
       if (e.key === "ArrowLeft" && index > 0) onIndex(index - 1);
     };
     window.addEventListener("keydown", onKey);
-    // Android back button / browser back closes the viewer.
-    history.pushState({ lightbox: true }, "");
-    const onPop = () => onClose();
-    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [index, count, onClose, onIndex]);
+
+  useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("popstate", onPop);
       document.body.style.overflow = "";
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, count]);
+  }, []);
 
-  const close = () => {
-    if (history.state?.lightbox) history.back();
-    else onClose();
-  };
+  const close = onClose;
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Photo viewer" className="fixed inset-0 z-50 flex flex-col bg-foreground">
