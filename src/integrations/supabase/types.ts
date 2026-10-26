@@ -14,13 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          access_pin_hash: string | null
+          cover_image_path: string | null
+          created_at: string | null
+          description: string | null
+          downloads_enabled: boolean
+          event_date: string | null
+          event_type: string | null
+          gallery_visible: boolean
+          id: string
+          max_file_size_mb: number
+          max_photos: number
+          max_uploads_per_guest: number
+          owner_id: string
+          privacy: string
+          slug: string
+          title: string
+          uploads_enabled: boolean
+        }
+        Insert: {
+          access_pin_hash?: string | null
+          cover_image_path?: string | null
+          created_at?: string | null
+          description?: string | null
+          downloads_enabled?: boolean
+          event_date?: string | null
+          event_type?: string | null
+          gallery_visible?: boolean
+          id?: string
+          max_file_size_mb?: number
+          max_photos?: number
+          max_uploads_per_guest?: number
+          owner_id: string
+          privacy?: string
+          slug: string
+          title: string
+          uploads_enabled?: boolean
+        }
+        Update: {
+          access_pin_hash?: string | null
+          cover_image_path?: string | null
+          created_at?: string | null
+          description?: string | null
+          downloads_enabled?: boolean
+          event_date?: string | null
+          event_type?: string | null
+          gallery_visible?: boolean
+          id?: string
+          max_file_size_mb?: number
+          max_photos?: number
+          max_uploads_per_guest?: number
+          owner_id?: string
+          privacy?: string
+          slug?: string
+          title?: string
+          uploads_enabled?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          event_id: string
+          file_size: number
+          height: number | null
+          id: string
+          mime_type: string
+          original_filename: string | null
+          storage_path: string
+          thumbnail_path: string | null
+          uploaded_at: string | null
+          uploader_hash: string | null
+          width: number | null
+        }
+        Insert: {
+          event_id: string
+          file_size: number
+          height?: number | null
+          id?: string
+          mime_type: string
+          original_filename?: string | null
+          storage_path: string
+          thumbnail_path?: string | null
+          uploaded_at?: string | null
+          uploader_hash?: string | null
+          width?: number | null
+        }
+        Update: {
+          event_id?: string
+          file_size?: number
+          height?: number | null
+          id?: string
+          mime_type?: string
+          original_filename?: string | null
+          storage_path?: string
+          thumbnail_path?: string | null
+          uploaded_at?: string | null
+          uploader_hash?: string | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      upload_attempts: {
+        Row: {
+          client_hash: string
+          created_at: string
+          event_id: string
+          id: number
+        }
+        Insert: {
+          client_hash: string
+          created_at?: string
+          event_id: string
+          id?: number
+        }
+        Update: {
+          client_hash?: string
+          created_at?: string
+          event_id?: string
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "upload_attempts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      my_event_stats: {
+        Args: never
+        Returns: {
+          event_id: string
+          last_upload: string
+          photo_count: number
+          total_bytes: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
