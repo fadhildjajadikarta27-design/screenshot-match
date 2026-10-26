@@ -51,8 +51,10 @@ export type EventRecord = {
   max_uploads_per_guest: number;
   created_at: string | null;
   plan: string;
+  audience_size: string;
+  addons: string[];
   expires_at: string | null;
 };
 
 export const EVENT_COLUMNS =
-  "id,title,slug,event_type,event_date,description,cover_image_path,privacy,uploads_enabled,downloads_enabled,gallery_visible,max_file_size_mb,max_photos,max_uploads_per_guest,created_at,plan,expires_at";
+  "id,title,slug,event_type,event_date,description,cover_image_path,privacy,uploads_enabled,downloads_enabled,gallery_visible,max_file_size_mb,max_photos,max_uploads_per_guest,created_at,plan,expires_at,audience_size,addons";
