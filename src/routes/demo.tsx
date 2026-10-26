@@ -32,7 +32,7 @@ function Demo() {
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-5 py-12">
         <p className="eyebrow">Sample album · illustrative photos</p>
-        <h1 className="mt-3 font-display text-5xl">Amelia &amp; James</h1>
+        <h1 className="mt-3 font-display text-5xl">Ayu &amp; Bima</h1>
         <p className="mt-2 text-muted-foreground">Wedding · 14 June 2026 · {photos.length} photos</p>
         <div className="mt-6 rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground">
           This is how guests see an album after scanning your QR code. Create your own event to try real uploads.

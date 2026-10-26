@@ -99,7 +99,7 @@ export function EventForm({ initial, onSaved }: Props) {
         <h2 className="font-display text-2xl">Details</h2>
         <div className="space-y-1.5">
           <Label htmlFor="title">Event title</Label>
-          <Input id="title" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }} placeholder="Amelia & James" />
+          <Input id="title" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }} placeholder="Ayu & Bima" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="slug">Event link</Label>
