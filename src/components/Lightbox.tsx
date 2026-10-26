@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, X, Loader2 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -15,12 +15,14 @@ type Props = {
 export function Lightbox({ count, index, onIndex, onClose, resolveUrl, onDownload, caption }: Props) {
   const [url, setUrl] = useState<string | null>(null);
   const [state, setState] = useState<"loading" | "ok" | "error">("loading");
+  const resolveRef = useRef(resolveUrl);
+  resolveRef.current = resolveUrl;
 
   useEffect(() => {
     let alive = true;
     setState("loading");
     setUrl(null);
-    resolveUrl(index)
+    resolveRef.current(index)
       .then((u) => {
         if (!alive) return;
         if (u) setUrl(u);
@@ -30,7 +32,7 @@ export function Lightbox({ count, index, onIndex, onClose, resolveUrl, onDownloa
     return () => {
       alive = false;
     };
-  }, [index, resolveUrl]);
+  }, [index]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
