@@ -8,6 +8,7 @@ import {
   sanitizeFilename,
   sniffImageType,
 } from "./image-validation";
+import { isExpired } from "./plans";
 import { checkAccessToken, clientHash } from "./access.server";
 
 export const BUCKET = "event-photos";
@@ -28,6 +29,8 @@ export type EventRow = {
   max_file_size_mb: number;
   max_photos: number;
   max_uploads_per_guest: number;
+  plan: string;
+  expires_at: string | null;
 };
 
 export function db() {
@@ -39,7 +42,7 @@ export async function loadEvent(slug: string): Promise<EventRow | null> {
   const { data } = await supabaseAdmin
     .from("events")
     .select(
-      "id,title,slug,event_type,event_date,description,cover_image_path,privacy,access_pin_hash,uploads_enabled,downloads_enabled,gallery_visible,max_file_size_mb,max_photos,max_uploads_per_guest",
+      "id,title,slug,event_type,event_date,description,cover_image_path,privacy,access_pin_hash,uploads_enabled,downloads_enabled,gallery_visible,max_file_size_mb,max_photos,max_uploads_per_guest,plan,expires_at",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -69,6 +72,7 @@ export async function processUpload(form: FormData, ip: string, ua: string): Pro
 
   const ev = await loadEvent(slug);
   if (!ev) return fail("This event no longer exists.", 404);
+  if (isExpired(ev.expires_at)) return fail("This album has ended and no longer accepts photos.", 403);
   if (!ev.uploads_enabled) return fail("Uploads are closed for this event.", 403);
   if (!(await hasAccess(ev, token))) return fail("Enter the event PIN to upload.", 401);
   if (!(file instanceof File)) return fail("No file received.");

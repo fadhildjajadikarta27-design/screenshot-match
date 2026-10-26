@@ -88,7 +88,7 @@ function GuestPage() {
 
   if (!ev.unlocked) {
     return (
-      <Shell>
+      <Shell hideBranding={ev.hideBranding}>
         {header}
         <PinForm
           slug={slug}
@@ -102,9 +102,10 @@ function GuestPage() {
   }
 
   return (
-    <Shell>
+    <Shell hideBranding={ev.hideBranding}>
       {header}
-      <Uploader slug={slug} token={token} enabled={ev.uploadsEnabled} maxMb={ev.maxFileSizeMb} />
+      {ev.expired && <p className="mt-8 rounded-xl border border-border bg-card p-4 text-center text-sm">Album ini sudah berakhir dan tidak menerima foto baru lagi.</p>}
+      {!ev.expired && <Uploader slug={slug} token={token} enabled={ev.uploadsEnabled} maxMb={ev.maxFileSizeMb} />}
       {ev.galleryVisible ? (
         <Gallery slug={slug} token={token} downloads={ev.downloadsEnabled} initialCount={ev.photoCount} />
       ) : (
@@ -114,14 +115,14 @@ function GuestPage() {
   );
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, hideBranding = false }: { children: React.ReactNode; hideBranding?: boolean }) {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-3xl px-4 pb-16 pt-6">
-        <div className="mb-8 flex justify-center"><Wordmark /></div>
+        {!hideBranding && <div className="mb-8 flex justify-center"><Wordmark /></div>}
         {children}
         <p className="mt-16 text-center text-xs text-muted-foreground">
-          Powered by <Link to="/" className="underline underline-offset-2">VELORA</Link> · <Link to="/privacy" className="underline underline-offset-2">Privacy</Link>
+          {!hideBranding && <>Powered by <Link to="/" className="underline underline-offset-2">VELORA</Link> · </>}<Link to="/privacy" className="underline underline-offset-2">Privacy</Link>
         </p>
       </div>
     </div>

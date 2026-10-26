@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PIN_RE, SLUG_RE } from "./image-validation";
+import { PLAN_IDS, PLAN_TIERS, computeExpiresAt, type PlanId } from "./plans";
 
 const BUCKET = "event-photos";
 
@@ -21,6 +22,7 @@ const eventInput = z.object({
   maxFileSizeMb: z.number().int().min(1).max(25),
   maxPhotos: z.number().int().min(1).max(20000),
   maxUploadsPerGuest: z.number().int().min(1).max(500),
+  plan: z.enum(PLAN_IDS as [PlanId, ...PlanId[]]).default("free"),
 });
 
 export const saveEvent = createServerFn({ method: "POST" })
@@ -48,7 +50,9 @@ export const saveEvent = createServerFn({ method: "POST" })
       downloads_enabled: data.downloadsEnabled,
       gallery_visible: data.galleryVisible,
       max_file_size_mb: data.maxFileSizeMb,
-      max_photos: data.maxPhotos,
+      max_photos: PLAN_TIERS[data.plan].maxPhotos,
+      plan: data.plan,
+      expires_at: computeExpiresAt(data.plan, data.eventDate),
       max_uploads_per_guest: data.maxUploadsPerGuest,
       ...(data.coverImagePath !== undefined ? { cover_image_path: data.coverImagePath } : {}),
       ...(pinHash ? { access_pin_hash: pinHash } : {}),

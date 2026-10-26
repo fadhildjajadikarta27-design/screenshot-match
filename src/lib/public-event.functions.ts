@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { isExpired, planOf } from "./plans";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { PIN_RE, SLUG_RE } from "./image-validation";
@@ -23,6 +24,8 @@ type EventRow = {
   max_file_size_mb: number;
   max_photos: number;
   max_uploads_per_guest: number;
+  plan: string;
+  expires_at: string | null;
 };
 
 async function admin() {
@@ -36,7 +39,7 @@ async function loadEvent(slug: string): Promise<EventRow | null> {
   const { data } = await db
     .from("events")
     .select(
-      "id,title,slug,event_type,event_date,description,cover_image_path,privacy,access_pin_hash,uploads_enabled,downloads_enabled,gallery_visible,max_file_size_mb,max_photos,max_uploads_per_guest",
+      "id,title,slug,event_type,event_date,description,cover_image_path,privacy,access_pin_hash,uploads_enabled,downloads_enabled,gallery_visible,max_file_size_mb,max_photos,max_uploads_per_guest,plan,expires_at",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -76,6 +79,8 @@ export type PublicEvent = {
   galleryVisible: boolean;
   maxFileSizeMb: number;
   photoCount: number;
+  expired: boolean;
+  hideBranding: boolean;
 };
 
 export const getPublicEvent = createServerFn({ method: "POST" })
@@ -107,7 +112,9 @@ export const getPublicEvent = createServerFn({ method: "POST" })
       coverUrl,
       isProtected: ev.privacy === "pin",
       unlocked,
-      uploadsEnabled: ev.uploads_enabled,
+      uploadsEnabled: ev.uploads_enabled && !isExpired(ev.expires_at),
+      expired: isExpired(ev.expires_at),
+      hideBranding: planOf(ev.plan).hideBranding,
       downloadsEnabled: ev.downloads_enabled,
       galleryVisible: ev.gallery_visible,
       maxFileSizeMb: ev.max_file_size_mb,
