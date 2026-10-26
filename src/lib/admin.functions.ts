@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PIN_RE, SLUG_RE } from "./image-validation";
-import { PLAN_IDS, PLAN_TIERS, computeExpiresAt, type PlanId } from "./plans";
+import { ADDON_IDS, AUDIENCE_IDS, PLAN_IDS, PLAN_TIERS, computeExpiresAt, type AddonId, type AudienceId, type PlanId } from "./plans";
 
 const BUCKET = "event-photos";
 
@@ -22,7 +22,9 @@ const eventInput = z.object({
   maxFileSizeMb: z.number().int().min(1).max(25),
   maxPhotos: z.number().int().min(1).max(20000),
   maxUploadsPerGuest: z.number().int().min(1).max(500),
-  plan: z.enum(PLAN_IDS as [PlanId, ...PlanId[]]).default("free"),
+  plan: z.enum(PLAN_IDS as [PlanId, ...PlanId[]]).default("trial"),
+  audienceSize: z.enum(AUDIENCE_IDS as [AudienceId, ...AudienceId[]]).default("s"),
+  addons: z.array(z.enum(ADDON_IDS as [AddonId, ...AddonId[]])).max(10).default([]),
 });
 
 export const saveEvent = createServerFn({ method: "POST" })
@@ -52,6 +54,8 @@ export const saveEvent = createServerFn({ method: "POST" })
       max_file_size_mb: data.maxFileSizeMb,
       max_photos: PLAN_TIERS[data.plan].maxPhotos,
       plan: data.plan,
+      audience_size: data.audienceSize,
+      addons: [...new Set(data.addons)],
       expires_at: computeExpiresAt(data.plan, data.eventDate),
       max_uploads_per_guest: data.maxUploadsPerGuest,
       ...(data.coverImagePath !== undefined ? { cover_image_path: data.coverImagePath } : {}),

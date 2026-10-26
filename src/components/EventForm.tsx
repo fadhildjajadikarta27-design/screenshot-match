@@ -11,7 +11,8 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
 import { EVENT_TYPES, type EventRecord } from "./AdminShell";
-import { EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, formatRupiah, isPlanId, priceFor, type PlanId } from "@/lib/plans";
+import { ADDONS, AUDIENCE, AUDIENCE_IDS, EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, formatRupiah, isAddonId, isAudienceId, isPlanId, priceFor, type AddonId, type AudienceId, type PlanId } from "@/lib/plans";
+import { PackageAdvisor } from "./PackageAdvisor";
 
 type Props = { initial?: EventRecord; onSaved: (r: { id: string; slug: string }) => void };
 
@@ -33,7 +34,10 @@ export function EventForm({ initial, onSaved }: Props) {
   const [downloadsEnabled, setDownloads] = useState(initial?.downloads_enabled ?? true);
   const [galleryVisible, setGallery] = useState(initial?.gallery_visible ?? true);
   const [maxFileSizeMb, setMaxFile] = useState(initial?.max_file_size_mb ?? 15);
-  const [plan, setPlan] = useState<PlanId>(isPlanId(initial?.plan) ? initial.plan : "free");
+  const [plan, setPlan] = useState<PlanId>(isPlanId(initial?.plan) ? initial.plan : "trial");
+  const [audience, setAudience] = useState<AudienceId>(isAudienceId(initial?.audience_size) ? initial.audience_size : "s");
+  const [addons, setAddons] = useState<AddonId[]>((initial?.addons ?? []).filter(isAddonId));
+  const total = priceFor(eventType, plan, audience) + addons.reduce((s, id) => s + (ADDONS.find((a) => a.id === id)?.price ?? 0), 0);
   const maxPhotos = PLAN_TIERS[plan].maxPhotos;
   const [maxUploadsPerGuest, setMaxGuest] = useState(initial?.max_uploads_per_guest ?? 50);
   const [cover, setCover] = useState<File | null>(null);
@@ -76,6 +80,8 @@ export function EventForm({ initial, onSaved }: Props) {
       maxPhotos,
       maxUploadsPerGuest,
       plan,
+      audienceSize: audience,
+      addons,
     };
     try {
       let res = await save({ data: { ...base, id: initial?.id } });
@@ -136,8 +142,15 @@ export function EventForm({ initial, onSaved }: Props) {
       <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
         <div>
           <h2 className="font-display text-2xl">Paket</h2>
-          <p className="text-sm text-muted-foreground">Harga untuk {EVENT_TYPE_LABELS[eventType ?? "Other"] ?? "acara ini"}. Pembayaran segera hadir.</p>
+          <p className="text-sm text-muted-foreground">Harga untuk {EVENT_TYPE_LABELS[eventType ?? "Other"] ?? "acara ini"}, menyesuaikan jumlah tamu. Pembayaran segera hadir.</p>
         </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="aud">Perkiraan jumlah tamu</Label>
+          <select id="aud" value={audience} onChange={(e) => setAudience(e.target.value as AudienceId)} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
+            {AUDIENCE_IDS.map((a) => <option key={a} value={a}>{AUDIENCE[a].label}</option>)}
+          </select>
+        </div>
+        <PackageAdvisor eventType={eventType ?? "Other"} audience={audience} onApply={(p, a) => { setPlan(p); setAddons(a); toast.success("Rekomendasi diterapkan"); }} />
         <div className="grid gap-3 sm:grid-cols-2">
           {PLAN_IDS.map((id) => {
             const t = PLAN_TIERS[id];
@@ -146,17 +159,32 @@ export function EventForm({ initial, onSaved }: Props) {
                 <input type="radio" name="plan" className="sr-only" checked={plan === id} onChange={() => setPlan(id)} />
                 <div className="flex items-baseline justify-between gap-2">
                   <p className="font-medium">{t.name}</p>
-                  <p className="font-display text-lg">{formatRupiah(priceFor(eventType, id))}</p>
+                  <p className="font-display text-lg">{formatRupiah(priceFor(eventType, id, audience))}</p>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{blurbFor(eventType, id)}</p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {id === "exclusive" ? "Foto tanpa batas" : `${t.maxPhotos.toLocaleString("id-ID")} foto`} · aktif {t.activeDays >= 365 ? "1 tahun" : t.activeDays >= 180 ? "6 bulan" : `${t.activeDays} hari`}
+                  {`${t.maxPhotos.toLocaleString("id-ID")} foto`} · aktif {t.activeDays >= 365 ? "1 tahun" : t.activeDays >= 180 ? "6 bulan" : `${t.activeDays} hari`}
                   {t.zipDownload ? " · unduh ZIP" : ""}{t.hideBranding ? " · tanpa logo" : ""}
                 </p>
               </label>
             );
           })}
         </div>
+        <div className="space-y-2">
+          <p className="font-medium">Add-on</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {ADDONS.map((a) => {
+              const on = addons.includes(a.id);
+              return (
+                <label key={a.id} className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${on ? "border-gold bg-accent/50" : "border-border"}`}>
+                  <input type="checkbox" checked={on} onChange={() => setAddons(on ? addons.filter((x) => x !== a.id) : [...addons, a.id])} className="mt-1 accent-[var(--color-gold)]" />
+                  <span className="text-sm"><span className="font-medium">{a.name}</span> · {formatRupiah(a.price)}<span className="block text-muted-foreground">{a.desc}</span></span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+        <p className="text-right">Total: <span className="font-display text-2xl">{formatRupiah(total)}</span></p>
       </section>
 
       <section className="space-y-5 rounded-2xl border border-border bg-card p-6">
