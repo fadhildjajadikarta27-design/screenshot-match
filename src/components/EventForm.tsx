@@ -11,6 +11,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
 import { EVENT_TYPES, type EventRecord } from "./AdminShell";
+import { EVENT_TYPE_LABELS, PLAN_IDS, PLAN_TIERS, blurbFor, formatRupiah, isPlanId, priceFor, type PlanId } from "@/lib/plans";
 
 type Props = { initial?: EventRecord; onSaved: (r: { id: string; slug: string }) => void };
 
@@ -32,7 +33,8 @@ export function EventForm({ initial, onSaved }: Props) {
   const [downloadsEnabled, setDownloads] = useState(initial?.downloads_enabled ?? true);
   const [galleryVisible, setGallery] = useState(initial?.gallery_visible ?? true);
   const [maxFileSizeMb, setMaxFile] = useState(initial?.max_file_size_mb ?? 15);
-  const [maxPhotos, setMaxPhotos] = useState(initial?.max_photos ?? 2000);
+  const [plan, setPlan] = useState<PlanId>(isPlanId(initial?.plan) ? initial.plan : "free");
+  const maxPhotos = PLAN_TIERS[plan].maxPhotos;
   const [maxUploadsPerGuest, setMaxGuest] = useState(initial?.max_uploads_per_guest ?? 50);
   const [cover, setCover] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -73,6 +75,7 @@ export function EventForm({ initial, onSaved }: Props) {
       maxFileSizeMb,
       maxPhotos,
       maxUploadsPerGuest,
+      plan,
     };
     try {
       let res = await save({ data: { ...base, id: initial?.id } });
@@ -112,7 +115,7 @@ export function EventForm({ initial, onSaved }: Props) {
           <div className="space-y-1.5">
             <Label htmlFor="type">Category</Label>
             <select id="type" value={eventType ?? ""} onChange={(e) => setEventType(e.target.value)} className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm">
-              {EVENT_TYPES.map((t) => <option key={t}>{t}</option>)}
+              {EVENT_TYPES.map((t) => <option key={t} value={t}>{EVENT_TYPE_LABELS[t]}</option>)}
             </select>
           </div>
           <div className="space-y-1.5">
@@ -127,6 +130,32 @@ export function EventForm({ initial, onSaved }: Props) {
         <div className="space-y-1.5">
           <Label htmlFor="cover">Cover image (optional)</Label>
           <Input id="cover" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setCover(e.target.files?.[0] ?? null)} />
+        </div>
+      </section>
+
+      <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
+        <div>
+          <h2 className="font-display text-2xl">Paket</h2>
+          <p className="text-sm text-muted-foreground">Harga untuk {EVENT_TYPE_LABELS[eventType ?? "Other"] ?? "acara ini"}. Pembayaran segera hadir.</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {PLAN_IDS.map((id) => {
+            const t = PLAN_TIERS[id];
+            return (
+              <label key={id} className={`cursor-pointer rounded-xl border p-4 ${plan === id ? "border-gold bg-accent/50" : "border-border"}`}>
+                <input type="radio" name="plan" className="sr-only" checked={plan === id} onChange={() => setPlan(id)} />
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="font-medium">{t.name}</p>
+                  <p className="font-display text-lg">{formatRupiah(priceFor(eventType, id))}</p>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">{blurbFor(eventType, id)}</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {id === "exclusive" ? "Foto tanpa batas" : `${t.maxPhotos.toLocaleString("id-ID")} foto`} · aktif {t.activeDays >= 365 ? "1 tahun" : t.activeDays >= 180 ? "6 bulan" : `${t.activeDays} hari`}
+                  {t.zipDownload ? " · unduh ZIP" : ""}{t.hideBranding ? " · tanpa logo" : ""}
+                </p>
+              </label>
+            );
+          })}
         </div>
       </section>
 
@@ -154,9 +183,8 @@ export function EventForm({ initial, onSaved }: Props) {
 
       <section className="space-y-4 rounded-2xl border border-border bg-card p-6">
         <h2 className="font-display text-2xl">Limits</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <NumberField id="mf" label="Max photo size (MB)" min={1} max={25} value={maxFileSizeMb} onChange={setMaxFile} />
-          <NumberField id="mp" label="Max photos in album" min={1} max={20000} value={maxPhotos} onChange={setMaxPhotos} />
           <NumberField id="mg" label="Max photos per guest" min={1} max={500} value={maxUploadsPerGuest} onChange={setMaxGuest} />
         </div>
       </section>
