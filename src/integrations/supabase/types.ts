@@ -193,6 +193,7 @@ export type Database = {
           total_bytes: number
         }[]
       }
+      owns_event_folder: { Args: { _name: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

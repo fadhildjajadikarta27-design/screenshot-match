@@ -8,6 +8,13 @@
       "when": 1793017122514,
       "tag": "0000_velora_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793017160512,
+      "tag": "0001_storage_policies",
+      "breakpoints": true
     }
   ]
 }
