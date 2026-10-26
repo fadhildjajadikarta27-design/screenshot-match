@@ -1,15 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
-import {
-  HARD_MAX_FILE_MB,
-  MAX_THUMB_BYTES,
-  PIN_RE,
-  SLUG_RE,
-  extForMime,
-  sanitizeFilename,
-  sniffImageType,
-} from "./image-validation";
+import { PIN_RE, SLUG_RE } from "./image-validation";
 
 const BUCKET = "event-photos";
 const PAGE_SIZE = 24;
