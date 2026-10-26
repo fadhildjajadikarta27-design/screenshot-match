@@ -56,8 +56,8 @@ export function EventForm({ initial, onSaved }: Props) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!SLUG_RE.test(slug)) return toast.error("Link must be 3–60 lowercase letters, numbers or dashes.");
-    if ((needsPin || pin) && !PIN_RE.test(pin)) return toast.error("PIN must be 4–8 digits.");
+    if (!SLUG_RE.test(slug)) { toast.error("Link must be 3–60 lowercase letters, numbers or dashes."); return; }
+    if ((needsPin || pin) && !PIN_RE.test(pin)) { toast.error("PIN must be 4–8 digits."); return; }
     setBusy(true);
     const base = {
       title,

@@ -8,7 +8,7 @@ type Props = {
   onIndex: (i: number) => void;
   onClose: () => void;
   resolveUrl: (i: number) => Promise<string | null>;
-  onDownload?: (i: number) => void;
+  onDownload?: ((i: number) => void) | undefined;
   caption?: (i: number) => string;
 };
 
