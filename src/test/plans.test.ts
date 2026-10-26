@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PLAN_IDS, PLAN_TIERS, computeExpiresAt, isExpired, priceFor } from "@/lib/plans";
+import { ADDONS, AUDIENCE_IDS, EVENT_TYPES, PAID_PLAN_IDS, PLAN_IDS, PLAN_TIERS, computeExpiresAt, isExpired, priceFor } from "@/lib/plans";
 
 describe("plans", () => {
   it("prices differ per event type", () => {
