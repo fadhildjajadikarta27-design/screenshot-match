@@ -246,7 +246,7 @@ function Uploader({ slug, token, enabled, maxMb }: { slug: string; token: string
         patch(item.key, { status: "error", error: err.message, retry: err.retry !== false });
       }
     },
-    [slug, token, maxMb, patch],
+    [slug, token, maxMb, patch, language],
   );
 
   const pump = useCallback(() => {

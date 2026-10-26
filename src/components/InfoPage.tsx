@@ -22,9 +22,9 @@ export function InfoPage({ eyebrow, title, children }: { eyebrow: string; title:
 export function metaFor(title: string, description: string) {
   return {
     meta: [
-      { title: `${tr(title)} — VELORA` },
+      { title: `${title} — VELORA` },
       { name: "description", content: description },
-      { property: "og:title", content: `${tr(title)} — VELORA` },
+      { property: "og:title", content: `${title} — VELORA` },
       { property: "og:description", content: description },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

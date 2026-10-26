@@ -51,7 +51,7 @@ function Pricing() {
             <div key={id} className={`flex flex-col rounded-2xl border bg-card p-6 text-foreground ${id === "premium" ? "border-gold" : "border-border"}`}>
               <p className="eyebrow">{tr(EVENT_TYPE_LABELS[type])}</p>
               <h2 className="!mt-2 font-display text-2xl">{tr(t.name)}</h2>
-              <p className="mt-2 font-display text-4xl">{formatPrice(priceFor(type, id, aud), language)}</p>
+              <p className="mt-2 break-words font-display text-3xl">{formatPrice(priceFor(type, id, aud), language)}</p>
               <p className="mt-2 text-sm text-muted-foreground">{tr(blurbFor(type, id))}</p>
               <ul className="mt-5 flex-1 space-y-2 text-sm">
                 {feats.map(([f, on]) => (
