@@ -56,8 +56,8 @@ export function EventForm({ initial, onSaved }: Props) {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!SLUG_RE.test(slug)) return toast.error("Link must be 3–60 lowercase letters, numbers or dashes.");
-    if ((needsPin || pin) && !PIN_RE.test(pin)) return toast.error("PIN must be 4–8 digits.");
+    if (!SLUG_RE.test(slug)) { toast.error("Link must be 3–60 lowercase letters, numbers or dashes."); return; }
+    if ((needsPin || pin) && !PIN_RE.test(pin)) { toast.error("PIN must be 4–8 digits."); return; }
     setBusy(true);
     const base = {
       title,
@@ -99,7 +99,7 @@ export function EventForm({ initial, onSaved }: Props) {
         <h2 className="font-display text-2xl">Details</h2>
         <div className="space-y-1.5">
           <Label htmlFor="title">Event title</Label>
-          <Input id="title" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }} placeholder="Amelia & James" />
+          <Input id="title" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }} placeholder="Ayu & Bima" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="slug">Event link</Label>

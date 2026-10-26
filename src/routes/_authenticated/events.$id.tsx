@@ -106,7 +106,7 @@ function ManageEvent() {
                       setDeleting(true);
                       const r = await del({ data: { id: ev.id } });
                       setDeleting(false);
-                      if (!r.ok) return toast.error(r.error);
+                      if (!r.ok) { toast.error(r.error); return; }
                       toast.success("Event deleted");
                       qc.invalidateQueries({ queryKey: ["my-events"] });
                       navigate({ to: "/dashboard" });
@@ -215,7 +215,7 @@ function PhotosPanel({ ev }: { ev: EventRecord }) {
               onClick={async () => {
                 if (!confirm("Delete this photo?")) return;
                 const r = await delPhoto({ data: { id: p.id } });
-                if (!r.ok) return toast.error(r.error);
+                if (!r.ok) { toast.error(r.error); return; }
                 qc.invalidateQueries({ queryKey: ["admin-photos", ev.id] });
                 qc.invalidateQueries({ queryKey: ["my-events"] });
               }}

@@ -175,8 +175,8 @@ type Item = {
   preview: string;
   status: "queued" | "preparing" | "uploading" | "done" | "error";
   progress: number;
-  error?: string;
-  retry?: boolean;
+  error?: string | undefined;
+  retry?: boolean | undefined;
 };
 
 const CONCURRENCY = 2;
