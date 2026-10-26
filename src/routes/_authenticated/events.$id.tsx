@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteEvent, deletePhoto } from "@/lib/admin.functions";
 import { formatBytes } from "@/lib/image-validation";
+import { isExpired, planOf } from "@/lib/plans";
 
 export const Route = createFileRoute("/_authenticated/events/$id")({
   head: () => ({
@@ -151,6 +152,8 @@ function SharePanel({ ev }: { ev: EventRecord }) {
           </Button>
         </div>
         <ul className="space-y-1 text-sm text-muted-foreground">
+          <li>Paket: {planOf(ev.plan).name} · Maks {planOf(ev.plan).maxPhotos.toLocaleString("id-ID")} foto</li>
+          <li>{ev.expires_at ? `${isExpired(ev.expires_at) ? "Album berakhir" : "Album aktif sampai"} ${new Date(ev.expires_at).toLocaleDateString("id-ID", { dateStyle: "long" })}` : "Tanpa tanggal berakhir"}</li>
           <li>Access: {ev.privacy === "pin" ? "PIN protected" : "Anyone with the link"}</li>
           <li>Uploads: {ev.uploads_enabled ? "Open" : "Closed"} · Gallery: {ev.gallery_visible ? "Visible" : "Hidden"} · Downloads: {ev.downloads_enabled ? "Allowed" : "Off"}</li>
         </ul>
@@ -203,6 +206,10 @@ function PhotosPanel({ ev }: { ev: EventRecord }) {
 
   return (
     <div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">Paket {planOf(ev.plan).name}</p>
+        {planOf(ev.plan).zipDownload ? <ZipButton eventId={ev.id} slug={ev.slug} /> : <p className="text-xs text-muted-foreground">Unduh semua (ZIP) tersedia di paket Premium & Exclusive</p>}
+      </div>
       <div className="grid grid-cols-3 gap-2 md:grid-cols-6">
         {photos.map((p, i) => (
           <div key={p.id} className="group relative">
@@ -247,5 +254,52 @@ function PhotosPanel({ ev }: { ev: EventRecord }) {
         />
       )}
     </div>
+  );
+}
+
+function ZipButton({ eventId, slug }: { eventId: string; slug: string }) {
+  const [busy, setBusy] = useState<string | null>(null);
+  async function run() {
+    setBusy("Menyiapkan…");
+    try {
+      const rows: { storage_path: string; original_filename: string | null }[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data, error } = await supabase.from("photos").select("storage_path,original_filename").eq("event_id", eventId).range(from, from + 999);
+        if (error) throw error;
+        rows.push(...(data ?? []));
+        if (!data || data.length < 1000) break;
+      }
+      if (!rows.length) { toast.error("Belum ada foto"); return; }
+      const { zipSync } = await import("fflate");
+      const files: Record<string, Uint8Array> = {};
+      for (let i = 0; i < rows.length; i += 50) {
+        const chunk = rows.slice(i, i + 50);
+        const { data: signed } = await supabase.storage.from("event-photos").createSignedUrls(chunk.map((r) => r.storage_path), 600);
+        await Promise.all(chunk.map(async (r, j) => {
+          const u = signed?.[j]?.signedUrl;
+          if (!u) return;
+          const res = await fetch(u);
+          if (!res.ok) return;
+          const ext = r.storage_path.split(".").pop();
+          files[`${String(i + j + 1).padStart(4, "0")}.${ext}`] = new Uint8Array(await res.arrayBuffer());
+        }));
+        setBusy(`${Math.min(i + 50, rows.length)}/${rows.length}`);
+      }
+      const blob = new Blob([zipSync(files, { level: 0 }) as BlobPart], { type: "application/zip" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `velora-${slug}.zip`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    } catch {
+      toast.error("Gagal membuat ZIP");
+    } finally {
+      setBusy(null);
+    }
+  }
+  return (
+    <Button variant="outline" size="sm" onClick={run} disabled={!!busy}>
+      {busy ? <Loader2 className="animate-spin" /> : <Download />} {busy ?? "Unduh semua (ZIP)"}
+    </Button>
   );
 }
